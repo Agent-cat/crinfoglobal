@@ -1,0 +1,39 @@
+import jwt from "jsonwebtoken";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+export const Protected = async (req, res, next) => {
+    try {
+        const token = req.cookies?.jwt;
+        if (!token) {
+            return res
+                .status(401)
+                .json({ message: "Unauthorized - No Token Provided" });
+        }
+        if (!process.env.JWT_SECRET) {
+            throw Error("no jwt secret provided");
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded) {
+            return res.status(401).json({ message: "Unauthorized - Invalid Token" });
+        }
+        console.log(decoded);
+        const user = await prisma.user.findUnique({
+            where: {
+                id: decoded.userId,
+            },
+        });
+        if (!user) {
+            return res.status(401).json({ message: "User not found" });
+        }
+        req.user = user;
+        next();
+    }
+    catch (error) {
+        console.error("Auth error:", error);
+        return res.status(401).json({
+            message: "Unauthorized - Invalid Token",
+            error: error instanceof Error ? error.message : String(error),
+        });
+    }
+};
+//# sourceMappingURL=auth.middleware.js.map
