@@ -52,7 +52,13 @@ export const Signup = async (req, res) => {
 };
 export const Logout = async (req, res) => {
     try {
-        res.cookie("jwt", "", { maxAge: 0 });
+        res.cookie("jwt", "", {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV !== "development",
+            path: "/",
+            expires: new Date(0),
+        });
         res.json({
             message: "user loged out",
         });

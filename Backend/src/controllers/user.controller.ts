@@ -60,7 +60,13 @@ export const Signup = async (req: any, res: any) => {
 
 export const Logout = async (req: any, res: any) => {
   try {
-    res.cookie("jwt", "", { maxAge: 0 });
+    res.cookie("jwt", "", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV !== "development",
+      path: "/",
+      expires: new Date(0),
+    });
     res.json({
       message: "user loged out",
     });

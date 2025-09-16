@@ -7,20 +7,9 @@ const api = axios.create({
   withCredentials: true,
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
 export const signin = async (email, password) => {
   const response = await api.post(`/signin`, { email, password });
-  if (response.data.token) {
-    localStorage.setItem('token', response.data.token);
-  }
-  return response.data.user;
+  return response.data.data;
 };
 
 export const signup = async (email, userName, password) => {
@@ -29,21 +18,17 @@ export const signup = async (email, userName, password) => {
     userName,
     password,
   });
-  if (response.data.token) {
-    localStorage.setItem('token', response.data.token);
-  }
-  return response.data.user;
+  return response.data.data;
 };
 
 export const logout = async () => {
-  localStorage.removeItem('token');
+  const res = await api.post(`/logout`);
+  if (res.status !== 200) {
+    throw new Error('Logout failed');
+  }
 };
 
 export const checkAuth = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error("No token found");
-  }
   const response = await api.get(`/check`);
   return response.data;
 };
