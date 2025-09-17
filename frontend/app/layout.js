@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body>
+      <body className="bg-white">
           <Navbar />
           <div className="">
             <div className="mx-auto ">
