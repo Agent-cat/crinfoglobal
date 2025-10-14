@@ -64,16 +64,16 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] border-b border-[#083b7a] shadow-md">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] border-b border-[#083b7a] shadow-md/60">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Branding */}
           <Link
             href="/"
-            className="text-xl md:text-2xl font-bold text-white hover:text-[#e6f0ff] transition-colors"
+            className="text-xl md:text-2xl font-bold tracking-tight text-white hover:text-[#e6f0ff] transition-colors"
             aria-label="Company Logo - Home"
           >
-            crinfoglobal
+            CrinfoGlobal
           </Link>
           
           {/* Desktop NavLinks */}
@@ -85,8 +85,8 @@ const Navbar = () => {
                   href={link.href}
                   className={`px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
                     isActive(link.href)
-                      ? "bg-white text-[#083b7a] shadow font-semibold"
-                      : "text-white hover:bg-white/10"
+                      ? "bg-white text-[#083b7a] shadow-sm font-semibold"
+                      : "text-white hover:bg-white/10 hover:shadow-sm"
                   }`}
                   aria-current={isActive(link.href) ? "page" : undefined}
                 >
@@ -105,7 +105,7 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center space-x-2 px-4 py-2 text-sm font-semibold rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 text-sm font-semibold rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-white/60"
                 >
                   <span>{user.userName || user.email}</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,17 +113,17 @@ const Navbar = () => {
                   </svg>
                 </button>
                 {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg ring-1 ring-black/5 border border-gray-100 py-2">
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                       onClick={() => setIsProfileOpen(false)}
                     >
                       Profile
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     >
                       Logout
                     </button>
@@ -133,12 +133,12 @@ const Navbar = () => {
             ) : (
               <>
                 <Link href="/auth/signin">
-                  <button className="px-4 py-2 text-sm font-semibold rounded-lg border border-white/70 text-white hover:bg-white/10 transition-colors">
+                  <button className="px-4 py-2 text-sm font-semibold rounded-lg border border-white/70 text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-white/60">
                     Sign In
                   </button>
                 </Link>
                 <Link href="/auth/signup">
-                  <button className="px-4 py-2 text-sm font-semibold rounded-lg bg-white text-[#083b7a] hover:bg-[#e6f0ff] border border-white/0 transition-colors">
+                  <button className="px-4 py-2 text-sm font-semibold rounded-lg bg-white text-[#083b7a] hover:bg-[#e6f0ff] border border-white/0 transition-colors shadow-sm">
                     Sign Up
                   </button>
                 </Link>
@@ -150,7 +150,7 @@ const Navbar = () => {
           {/* Mobile Toggle */}
           <button
             type="button"
-            className="md:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+            className="md:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus-visible:ring-white/60"
             aria-label="Open main menu"
             onClick={() => setIsOpen((open) => !open)}
           >
@@ -162,9 +162,9 @@ const Navbar = () => {
         
         {/* Mobile Nav */}
         {isOpen && (
-          <div className="md:hidden bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] border-t border-[#083b7a] px-2 pt-2 pb-3">
+          <div className="md:hidden bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] border-t border-[#083b7a] px-3 pt-3 pb-4 shadow-md/40">
             {/* Mobile NavLinks */}
-            <div className="flex flex-col items-center space-y-1 mb-4">
+            <div className="flex flex-col items-stretch space-y-1 mb-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -172,8 +172,8 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                   className={`block w-full text-center px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
                     isActive(link.href)
-                      ? "bg-white text-[#083b7a] shadow font-semibold"
-                      : "text-white hover:bg-white/10"
+                      ? "bg-white text-[#083b7a] shadow-sm font-semibold"
+                      : "text-white hover:bg-white/10 hover:shadow-sm"
                   }`}
                   aria-current={isActive(link.href) ? "page" : undefined}
                 >
@@ -202,7 +202,7 @@ const Navbar = () => {
                         handleLogout();
                         setIsOpen(false);
                       }}
-                      className="px-4 py-2 text-sm font-semibold rounded-lg bg-white text-[#083b7a] hover:bg-[#e6f0ff]"
+                      className="px-4 py-2 text-sm font-semibold rounded-lg bg-white text-[#083b7a] hover:bg-[#e6f0ff] shadow-sm"
                     >
                       Logout
                     </button>
@@ -216,7 +216,7 @@ const Navbar = () => {
                     </button>
                   </Link>
                   <Link href="/auth/signup" onClick={() => setIsOpen(false)}>
-                    <button className="px-4 py-2 text-sm font-semibold rounded-lg bg-white text-[#083b7a] hover:bg-[#e6f0ff]">
+                    <button className="px-4 py-2 text-sm font-semibold rounded-lg bg-white text-[#083b7a] hover:bg-[#e6f0ff] shadow-sm">
                       Sign Up
                     </button>
                   </Link>
