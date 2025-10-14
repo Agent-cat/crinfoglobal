@@ -12,6 +12,9 @@ const links = [
   { href: "/ethics", label: "Publication Ethics" },
   { href: "/contact", label: "Contact Information" },
   { href: "/special-issues", label: "Open Special Issues" },
+  { href: "/privacy-policy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms and Conditions" },
+  { href: "/refunds", label: "Cancellations & Refunds" },
 ];
 
 const Sidebar = () => {
