@@ -8,6 +8,8 @@ import {
   Signin,
   Logout,
   CheckAuth,
+  VerifyOTP,
+  ResendOTP,
 } from "../controllers/user.controller.js";
 import { Protected } from "../middlewares/auth.middleware.js";
 
@@ -17,6 +19,8 @@ router.get("/", GetAllUser);
 router.post("/signup", Signup);
 router.post("/signin", Signin);
 router.post("/logout", Logout);
+router.post("/verify-otp", VerifyOTP);
+router.post("/resend-otp", ResendOTP);
 router.post("/:id", GetUserById);
 router.delete("/delete/:id", DeleteUser);
 router.put("/update/:id", Protected, UpdateUser);

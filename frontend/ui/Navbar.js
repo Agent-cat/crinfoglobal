@@ -59,13 +59,13 @@ const Navbar = () => {
       authEvents.dispatch('logoutSuccess');
       router.push('/');
     } catch (e) {
-      // keep user state, optionally show error in future
+     
     }
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] border-b border-[#083b7a] shadow-md/60">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] border-b border-[#083b7a] ">
+      <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Branding */}
           <Link
@@ -79,20 +79,26 @@ const Navbar = () => {
           {/* Desktop NavLinks */}
           <div className="hidden md:flex flex-1 justify-center">
             <div className="flex items-center space-x-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
-                    isActive(link.href)
-                      ? "bg-white text-[#083b7a] shadow-sm font-semibold"
-                      : "text-white hover:bg-white/10 hover:shadow-sm"
-                  }`}
-                  aria-current={isActive(link.href) ? "page" : undefined}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks
+                .filter((link) => {
+                  if (!link.requiresRole) return true;
+                  if (!authLoaded) return false;
+                  return user && user.role === link.requiresRole;
+                })
+                .map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
+                      isActive(link.href)
+                        ? "bg-white text-[#083b7a] shadow-sm font-semibold"
+                        : "text-white hover:bg-white/10 hover:shadow-sm"
+                    }`}
+                    aria-current={isActive(link.href) ? "page" : undefined}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
             </div>
           </div>
           

@@ -44,3 +44,15 @@ export const Protected = async (req: any, res: any, next: any) => {
     });
   }
 };
+
+export const RequireEditor = (req: any, res: any, next: any) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    if (req.user.role !== 'EDITOR') {
+      return res.status(403).json({ message: 'Forbidden - Editor role required' });
+    }
+    next();
+  } catch (e) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+};

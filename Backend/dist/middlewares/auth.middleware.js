@@ -36,4 +36,17 @@ export const Protected = async (req, res, next) => {
         });
     }
 };
+export const RequireEditor = (req, res, next) => {
+    try {
+        if (!req.user)
+            return res.status(401).json({ message: "Unauthorized" });
+        if (req.user.role !== 'EDITOR') {
+            return res.status(403).json({ message: 'Forbidden - Editor role required' });
+        }
+        next();
+    }
+    catch (e) {
+        return res.status(403).json({ message: 'Forbidden' });
+    }
+};
 //# sourceMappingURL=auth.middleware.js.map

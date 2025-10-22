@@ -12,10 +12,84 @@ model User {
   userName String
   email    String @unique
   password String
-  role     Role   @default(USER)
+  role     Role   @default(RESEARCHER)
+  downloadRequests DownloadRequest[]
+  emailVerified    Boolean @default(false)
+  otpCode          String?
+  otpExpiresAt     DateTime?
 }
 
 enum Role {
-  ADMIN
-  USER
+  RESEARCHER
+  AUTHOR
+  EDITOR
+}
+
+model Volume {
+  id        String  @id @default(uuid())
+  number    Int
+  issues    Issue[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([number])
+}
+
+model Issue {
+  id        String  @id @default(uuid())
+  number    Int
+  month     String
+  year      Int
+  volumeId  String
+  volume    Volume  @relation(fields: [volumeId], references: [id])
+  articles  Article[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([volumeId, number])
+}
+
+enum ArticleStatus {
+  SUBMITTED
+  PUBLISHED
+}
+
+model Article {
+  id                 String         @id @default(uuid())
+  title              String
+  articleType        String
+  keywords           String?
+  abstract           String
+  conflictOfInterest String?
+  fundingInfo        String?
+  dataAvailability   String?
+  authorsJson        Json
+  status             ArticleStatus  @default(SUBMITTED)
+  issueId            String?
+  issue              Issue?         @relation(fields: [issueId], references: [id])
+  pdfPath            String?
+  totalPages         Int?
+  doi                String?
+  startPage          Int?
+  endPage            Int?
+  views              Int            @default(0)
+  publishedAt        DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  downloadRequests   DownloadRequest[]
+}
+
+enum DownloadStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+model DownloadRequest {
+  id        String         @id @default(uuid())
+  articleId String
+  article   Article        @relation(fields: [articleId], references: [id])
+  userId    String
+  user      User           @relation(fields: [userId], references: [id])
+  status    DownloadStatus @default(PENDING)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 }
