@@ -5,6 +5,7 @@ import { RequireEditor } from '../middlewares/auth.middleware.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { sendEditorNotificationEmail } from '../services/email.service.js';
 const uploadDir = path.join(process.cwd(), 'uploads', 'articles');
 const storage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadDir),
@@ -74,6 +75,15 @@ router.post('/articles', Protected, upload.single('pdf'), async (req, res) => {
                 status: 'SUBMITTED',
             },
         });
+        // Send email notification to editors
+        try {
+            await sendEditorNotificationEmail(article);
+            console.log('Editor notification email sent successfully');
+        }
+        catch (emailError) {
+            console.error('Failed to send editor notification email:', emailError);
+            // Don't fail the submission if email fails
+        }
         res.status(201).json({ message: 'Submitted', data: article });
     }
     catch (e) {
@@ -94,6 +104,71 @@ router.post('/articles/:articleId/publish', Protected, RequireEditor, async (req
     }
     catch (e) {
         res.status(400).json({ message: e.message });
+    }
+});
+// Editor: create and publish article directly
+router.post('/articles/create-publish', Protected, RequireEditor, upload.single('file'), async (req, res) => {
+    const { title, abstract, keywords, pages, doi, issueId, authors } = req.body;
+    try {
+        if (!title || !abstract || !issueId) {
+            return res.status(400).json({ message: 'Missing required fields: title, abstract, issueId' });
+        }
+        // Parse authors if it's a string
+        let authorsData;
+        try {
+            authorsData = typeof authors === 'string' ? JSON.parse(authors) : authors;
+        }
+        catch (e) {
+            return res.status(400).json({ message: 'Invalid authors format' });
+        }
+        if (!authorsData || !Array.isArray(authorsData) || authorsData.length === 0) {
+            return res.status(400).json({ message: 'At least one author is required' });
+        }
+        // Validate authors have required fields
+        for (const author of authorsData) {
+            if (!author.name || !author.email) {
+                return res.status(400).json({ message: 'All authors must have name and email' });
+            }
+        }
+        // Handle file upload
+        let pdfPublicPath = null;
+        let totalPages = null;
+        if (req.file?.path) {
+            pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(req.file.path)}`;
+            try {
+                const buffer = fs.readFileSync(req.file.path);
+                const text = buffer.toString('latin1');
+                const matches = text.match(/\/Type\s*\/Page\b/g);
+                if (matches && matches.length > 0) {
+                    totalPages = matches.length;
+                }
+            }
+            catch (_) {
+                // ignore page count errors, leave null
+            }
+        }
+        // Use pages from form if provided, otherwise use calculated pages
+        const finalPages = pages ? parseInt(pages) : totalPages;
+        const article = await prisma.article.create({
+            data: {
+                title,
+                abstract,
+                keywords: keywords || null,
+                doi: doi || null,
+                totalPages: finalPages,
+                authorsJson: authorsData,
+                pdfPath: pdfPublicPath,
+                issueId,
+                status: 'PUBLISHED',
+                articleType: 'Research Article', // Default type
+                publishedAt: new Date(),
+            },
+        });
+        res.status(201).json({ message: 'Article created and published', data: article });
+    }
+    catch (e) {
+        console.error('Create and publish article error:', e);
+        res.status(400).json({ message: e?.message || 'Failed to create and publish article' });
     }
 });
 // Fetch for admin panel
@@ -188,6 +263,14 @@ router.get('/articles/:articleId/download', Protected, async (req, res) => {
 });
 router.get('/articles', Protected, RequireEditor, async (_req, res) => {
     const articles = await prisma.article.findMany({ where: { status: 'SUBMITTED' } });
+    res.json({ data: articles });
+});
+// Editor: get published articles
+router.get('/articles/published', Protected, RequireEditor, async (_req, res) => {
+    const articles = await prisma.article.findMany({
+        where: { status: 'PUBLISHED' },
+        include: { issue: { include: { volume: true } } }
+    });
     res.json({ data: articles });
 });
 export default router;
