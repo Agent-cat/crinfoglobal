@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react'
 import { listPublicVolumes } from '../../utils/api'
+import Link from 'next/link';
 
 const Page = () => {
   const [volumes, setVolumes] = useState([])
@@ -43,9 +44,9 @@ const Page = () => {
                   </h2>
                   <div className='ml-6 space-y-1 mb-6'>
                     {(v.issues || []).map((issue) => (
-                      <a key={issue.id} href={`/issue/${issue.id}`} className='block text-gray-800 hover:text-blue-600 cursor-pointer transition-colors duration-200'>
+                      <Link key={issue.id} href={`/issue/${issue.id}`} className='block text-gray-800 hover:text-blue-600 cursor-pointer transition-colors duration-200'>
                         Issue - {issue.number} | {issue.month} {issue.year}
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </div>

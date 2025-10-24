@@ -25,10 +25,11 @@ export const Signin = async (req: any, res: any) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    generateToken(user.id, res);
+    const token = generateToken(user.id, res);
     res.status(200).json({
       message: "Success",
       data: { id: user.id, email: user.email, userName: user.userName, role: user.role },
+      token: token, // Also return token for localStorage
     });
   } catch (error) {
     res.status(500).json({ message: `Failed ${error}` });
@@ -90,7 +91,7 @@ export const Logout = async (req: any, res: any) => {
     res.cookie("jwt", "", {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV !== "development",
+      secure: false, // Match the generateToken settings
       path: "/",
       expires: new Date(0),
     });
@@ -264,7 +265,10 @@ export const ResendOTP = async (req: any, res: any) => {
 
 export const CheckAuth = async (req: any, res: any) => {
   try {
-    res.status(200).json(req.user);
+    res.status(200).json({ 
+      message: "Success", 
+      data: req.user 
+    });
   } catch (error: any) {
     console.log(`Error in checkAuth controller ${error.message}`);
     res.status(500).json({ message: "Internal server error" });

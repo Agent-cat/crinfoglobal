@@ -203,7 +203,7 @@ const SubmitPage = () => {
   return (
     <>
       <SuccessModal />
-      <div className='min-h-screen text-black text-xl bg-white mt-16 py-8 px-5'>
+      <div className='min-h-screen text-black text-md bg-white mt-16 py-8 px-5'>
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl md:text-3xl font-bold mb-6">Submit Your Article to Frontiers in Engineering and Informatics</h1>
 

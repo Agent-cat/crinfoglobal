@@ -14,18 +14,24 @@ const SignupPage = () => {
   const [success, setSuccess] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
   const [showOTPForm, setShowOTPForm] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
   const router = useRouter();
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setError(null);
+    setIsSigningUp(true);
     try {
       const response = await signup(email, userName, password);
       setSuccess(response.message);
       setShowOTPForm(true);
+      setOtpSent(true);
     } catch (error) {
       setError(error.response?.data?.message || "Signup failed");
+    } finally {
+      setIsSigningUp(false);
     }
   };
 
@@ -101,7 +107,7 @@ const SignupPage = () => {
                 disabled={isVerifying}
                 className="w-full px-4 py-3 font-semibold text-white bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] rounded-lg hover:from-[#083b7a]/90 hover:to-[#0a4ea3]/90 focus:outline-none focus:ring-2 focus:ring-[#0a4ea3] focus:ring-offset-2 transition-all duration-200 shadow-lg disabled:opacity-50"
               >
-                {isVerifying ? "Verifying..." : "Verify Email"}
+                {isVerifying ? "Verifying..." : "✅ Verify OTP"}
               </button>
               <button
                 type="button"
@@ -185,9 +191,10 @@ const SignupPage = () => {
           <div>
             <button
               type="submit"
-              className="w-full px-4 py-3 font-semibold text-white bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] rounded-lg hover:from-[#083b7a]/90 hover:to-[#0a4ea3]/90 focus:outline-none focus:ring-2 focus:ring-[#0a4ea3] focus:ring-offset-2 transition-all duration-200 shadow-lg"
+              disabled={isSigningUp}
+              className="w-full px-4 py-3 font-semibold text-white bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] rounded-lg hover:from-[#083b7a]/90 hover:to-[#0a4ea3]/90 focus:outline-none focus:ring-2 focus:ring-[#0a4ea3] focus:ring-offset-2 transition-all duration-200 shadow-lg disabled:opacity-50"
             >
-              Sign Up
+              {isSigningUp ? "Sending OTP..." : "📧 Send OTP"}
             </button>
           </div>
         </form>

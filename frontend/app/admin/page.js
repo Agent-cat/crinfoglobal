@@ -1,66 +1,71 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { checkAuth, createVolume, createIssue, listVolumes, listSubmittedArticles, publishArticle, listDownloadRequests, approveDownloadRequest, denyDownloadRequest } from '../../utils/api';
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { createVolume, createIssue } from '../../utils/api';
+import { useAuth } from '../../hooks/useAuth';
+import { useVolumes } from '../../hooks/useVolumes';
+import { useSubmittedArticles, usePublishedArticles, usePublishArticle } from '../../hooks/useArticles';
+import { useDownloadRequests, useApproveDownloadRequest, useDenyDownloadRequest } from '../../hooks/useDownloadRequests';
 
 const AdminPage = () => {
-  const [authLoaded, setAuthLoaded] = useState(false);
-  const [user, setUser] = useState(null);
-  const [volumes, setVolumes] = useState([]);
-  const [articles, setArticles] = useState([]);
+  // TanStack Query hooks
+  const { data: user, isLoading: authLoading, error: authError } = useAuth();
+  const { data: volumes = [], isLoading: volumesLoading } = useVolumes();
+  const { data: submittedArticles = [], isLoading: submittedLoading } = useSubmittedArticles();
+  const { data: publishedArticles = [], isLoading: publishedLoading } = usePublishedArticles();
+  const { data: downloadRequests = [], isLoading: downloadLoading } = useDownloadRequests();
+
+  const publishArticleMutation = usePublishArticle();
+  const approveDownloadMutation = useApproveDownloadRequest();
+  const denyDownloadMutation = useDenyDownloadRequest();
+
+  // Local state
   const [newVolumeNumber, setNewVolumeNumber] = useState('');
   const [newIssue, setNewIssue] = useState({ volumeId: '', number: '', month: '', year: '' });
   const [expandedArticleId, setExpandedArticleId] = useState(null);
-  const [downloadRequests, setDownloadRequests] = useState([]);
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const me = await checkAuth();
-        setUser(me);
-        if (me?.role !== 'EDITOR') {
-          setAuthLoaded(true);
-          return;
-        }
-        const [v, a, r] = await Promise.all([listVolumes(), listSubmittedArticles(), listDownloadRequests()]);
-        setVolumes(v);
-        setArticles(a);
-        setDownloadRequests(r);
-      } catch (_) {
-        setUser(null);
-      }
-      setAuthLoaded(true);
-    };
-    init();
-  }, []);
+  const [publishing, setPublishing] = useState({});
 
   const handleCreateVolume = async (e) => {
     e.preventDefault();
     const num = parseInt(newVolumeNumber, 10);
     if (!num) return;
-    const v = await createVolume(num);
-    setVolumes((prev) => [...prev, v]);
-    setNewVolumeNumber('');
+    try {
+      await createVolume(num);
+      // TanStack Query will automatically refetch volumes due to invalidation
+      setNewVolumeNumber('');
+    } catch (error) {
+      console.error('Failed to create volume:', error);
+    }
   };
 
   const handleCreateIssue = async (e) => {
     e.preventDefault();
     const { volumeId, number, month, year } = newIssue;
     if (!volumeId || !number || !month || !year) return;
-    const issue = await createIssue(volumeId, parseInt(number,10), month, parseInt(year,10));
-    setVolumes((prev) => prev.map(v => v.id === volumeId ? { ...v, issues: [...(v.issues || []), issue] } : v));
-    setNewIssue({ volumeId: '', number: '', month: '', year: '' });
+    try {
+      await createIssue(volumeId, parseInt(number,10), month, parseInt(year,10));
+      // TanStack Query will automatically refetch volumes due to invalidation
+      setNewIssue({ volumeId: '', number: '', month: '', year: '' });
+    } catch (error) {
+      console.error('Failed to create issue:', error);
+    }
   };
 
   const handlePublish = async (articleId, issueId) => {
-    await publishArticle(articleId, issueId);
-    setArticles((prev) => prev.filter(a => a.id !== articleId));
+    try {
+      await publishArticleMutation.mutateAsync({ articleId, issueId });
+      // TanStack Query will automatically refetch articles due to invalidation
+    } catch (error) {
+      console.error('Failed to publish article:', error);
+    }
   };
 
-  if (!authLoaded) {
+  // Loading states
+  if (authLoading) {
     return <div className="min-h-screen bg-white mt-16 py-8 px-5"><div className="max-w-4xl mx-auto"><div className="h-6 w-40 bg-gray-200 animate-pulse rounded mb-6" /></div></div>;
   }
 
-  if (!user) {
+  if (authError || !user) {
     return <div className="min-h-screen bg-white mt-16 py-8 px-5"><div className="max-w-2xl mx-auto text-center">Please sign in.</div></div>;
   }
 
@@ -73,14 +78,25 @@ const AdminPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl md:text-3xl font-bold">Admin Panel</h1>
-          <button onClick={() => history.back()} className="px-4 py-2 rounded-lg border border-gray-300 text-sm hover:bg-gray-50 transition-colors">
-            ← Back
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link href="/admin/submitted" className="px-4 py-2 rounded-lg bg-black text-white  transition-colors text-sm">
+              📝 Submitted Articles
+            </Link>
+            <Link href="/admin/published" className="px-4 py-2 rounded-lg bg-black text-white  transition-colors text-sm">
+              📚 Published Articles
+            </Link>
+            <Link href="/admin/publish" className="px-4 py-2 rounded-lg bg-[#083b7a] text-white hover:bg-[#0a4ea3] transition-colors text-sm">
+              📨 Publish Articles
+            </Link>
+            <button onClick={() => window.history.back()} className="px-4 py-2 rounded-lg border border-gray-300 text-sm hover:bg-gray-50 transition-colors">
+              ← Back
+            </button>
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid  gap-8">
           {/* Volumes & Issues Section */}
-          <section className="bg-gray-50 rounded-lg p-6">
+          <section className="bg-gray-50 w-full rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Volumes & Issues</h2>
             
             {/* Add Volume Form */}
@@ -143,7 +159,6 @@ const AdminPage = () => {
                 </button>
               </form>
             </div>
-
             {/* Volumes List */}
             <div className="space-y-3">
               <h3 className="font-medium text-gray-700">Existing Volumes</h3>
@@ -158,103 +173,83 @@ const AdminPage = () => {
             </div>
           </section>
 
-          {/* Submitted Articles Section */}
-          <section className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Submitted Articles</h2>
+          {/* Quick Stats Section */}
+          {/* <section className="bg-gray-50 rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Quick Stats</h2>
             <div className="space-y-4">
-              {articles.map(a => (
-                <div key={a.id} className="bg-white border rounded-lg p-4 shadow-sm">
-                  <div className="font-semibold text-gray-800 mb-1">{a.title}</div>
-                  <div className="text-sm text-gray-600 mb-3">{a.articleType}</div>
-                  
-                  <div className="flex flex-col sm:flex-row gap-2 mb-3">
-                    <button
-                      className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-sm transition-colors"
-                      onClick={() => setExpandedArticleId(expandedArticleId === a.id ? null : a.id)}
-                    >
-                      {expandedArticleId === a.id ? 'Hide Details' : 'View Details'}
-                    </button>
-                    <select className="flex-1 border rounded px-2 py-1 text-sm" defaultValue="">
-                      <option value="" disabled>Select Issue</option>
-                      {volumes.flatMap(v=> (v.issues||[]).map(i=> ({...i, volumeNumber: v.number}))).map(i => (
-                        <option key={i.id} value={i.id}>Vol {i.volumeNumber} - Issue {i.number} ({i.month} {i.year})</option>
-                      ))}
-                    </select>
-                    <button 
-                      className="px-3 py-1 rounded bg-[#083b7a] text-white hover:bg-[#0a4ea3] text-sm transition-colors" 
-                      onClick={(e)=>{
-                        const select = e.currentTarget.previousSibling;
-                        if (!select || !(select instanceof HTMLSelectElement) || !select.value) return;
-                        handlePublish(a.id, select.value);
-                      }}
-                    >
-                      Publish
-                    </button>
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-2xl font-bold text-orange-600">{submittedArticles.length}</div>
+                    <div className="text-sm text-gray-600">Submitted Articles</div>
                   </div>
-                  
-                  {expandedArticleId === a.id && (
-                    <div className="text-sm text-gray-700 border-t pt-3 mt-3 space-y-2">
-                      {a.keywords && <div><span className="font-medium">Keywords:</span> {a.keywords}</div>}
-                      {a.abstract && (
-                        <div>
-                          <div className="font-medium mb-1">Abstract</div>
-                          <div className="whitespace-pre-wrap text-gray-600">{a.abstract}</div>
-                        </div>
-                      )}
-                      {a.pdfPath && (
-                        <div className="flex items-center gap-2">
-                          <a 
-                            className="text-blue-700 hover:underline" 
-                            href={a.pdfPath.startsWith('/api/') ? `http://localhost:8000${a.pdfPath}` : a.pdfPath} 
-                            target="_blank" 
-                            rel="noreferrer"
-                          >
-                            Download PDF
-                          </a>
-                          {typeof a.totalPages === 'number' && (
-                            <span className="text-gray-500">({a.totalPages} pages)</span>
-                          )}
-                        </div>
-                      )}
+                  <Link href="/admin/submitted" className="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                    View All →
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">{publishedArticles.length}</div>
+                    <div className="text-sm text-gray-600">Published Articles</div>
+                  </div>
+                  <Link href="/admin/published" className="text-green-600 hover:text-green-700 text-sm font-medium">
+                    View All →
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">{volumes.length}</div>
+                    <div className="text-sm text-gray-600">Total Volumes</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      {volumes.reduce((sum, v) => sum + (v.issues?.length || 0), 0)}
                     </div>
-                  )}
-                </div>
-              ))}
-              {articles.length === 0 && (
-                <div className="text-center text-gray-500 py-8 bg-white rounded-lg border">
-                  No submissions pending
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Download Requests */}
-          <section className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Download Requests</h2>
-            <div className="space-y-3">
-              {downloadRequests.map(req => (
-                <div key={req.id} className="bg-white border rounded-lg p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <div className="text-sm text-gray-700">
-                    <div className="font-semibold text-gray-900">{req.article?.title || '—'}</div>
-                    <div className="text-gray-600">
-                      Volume {req.article?.issue?.volume?.number ?? '—'}
-                      {typeof req.article?.issue?.number === 'number' && (<span> • Issue {req.article.issue.number}</span>)}
-                    </div>
-                    <div className="text-gray-600">Request by: {req.user?.email || req.userId}</div>
-                    <div><span className="font-medium">Status:</span> {req.status}</div>
-                  </div>
-                  <div className="flex gap-2">
-                    {req.status !== 'APPROVED' && <button className="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 text-sm" onClick={async()=>{ await approveDownloadRequest(req.id); setDownloadRequests((prev)=>prev.map(r=> r.id===req.id ? {...r, status:'APPROVED'} : r)); }}>Approve</button>}
-                    {req.status === 'PENDING' && <button className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 text-sm" onClick={async()=>{ await denyDownloadRequest(req.id); setDownloadRequests((prev)=>prev.map(r=> r.id===req.id ? {...r, status:'DENIED'} : r)); }}>Deny</button>}
+                    <div className="text-sm text-gray-600">Total Issues</div>
                   </div>
                 </div>
-              ))}
-              {downloadRequests.length === 0 && (
-                <div className="text-center text-gray-500 py-8 bg-white rounded-lg border">No download requests</div>
-              )}
+              </div>
             </div>
-          </section>
+          </section> */}
         </div>
+
+        {/* Download Requests */}
+        <section className="bg-gray-50 rounded-lg p-6 mt-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Download Requests</h2>
+          <div className="space-y-3">
+            {downloadRequests.map(req => (
+              <div key={req.id} className="bg-white border rounded-lg p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="text-sm text-gray-700">
+                  <div className="font-semibold text-gray-900">{req.article?.title || '—'}</div>
+                  <div className="text-gray-600">
+                    Volume {req.article?.issue?.volume?.number ?? '—'}
+                    {typeof req.article?.issue?.number === 'number' && (<span> • Issue {req.article.issue.number}</span>)}
+                  </div>
+                  <div className="text-gray-600">Request by: {req.user?.email || req.userId}</div>
+                  <div><span className="font-medium">Status:</span> {req.status}</div>
+                </div>
+                <div className="flex gap-2">
+                  {req.status !== 'APPROVED' && <button className="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 text-sm" onClick={async()=>{ await approveDownloadRequest(req.id); setDownloadRequests((prev)=>prev.map(r=> r.id===req.id ? {...r, status:'APPROVED'} : r)); }}>Approve</button>}
+                  {req.status === 'PENDING' && <button className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 text-sm" onClick={async()=>{ await denyDownloadRequest(req.id); setDownloadRequests((prev)=>prev.map(r=> r.id===req.id ? {...r, status:'DENIED'} : r)); }}>Deny</button>}
+                </div>
+              </div>
+            ))}
+            {downloadRequests.length === 0 && (
+              <div className="text-center text-gray-500 py-8 bg-white rounded-lg border">No download requests</div>
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );

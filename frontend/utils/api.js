@@ -3,13 +3,48 @@ import axios from "axios";
 const API_URL = "http://localhost:8000/api/auth";
 const CONTENT_URL = "http://localhost:8000/api/content";
 
+// Get token from localStorage
+const getToken = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('jwt');
+  }
+  return null;
+};
+
+// Set token in localStorage
+const setToken = (token) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('jwt', token);
+  }
+};
+
+// Remove token from localStorage
+const removeToken = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('jwt');
+  }
+};
+
 const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,
 });
 
+// Add request interceptor to include JWT token in headers
+api.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export const signin = async (email, password) => {
   const response = await api.post(`/signin`, { email, password });
+  // Extract token from response if available
+  if (response.data.token) {
+    setToken(response.data.token);
+  }
   return response.data.data;
 };
 
@@ -33,19 +68,40 @@ export const resendOTP = async (email) => {
 };
 
 export const logout = async () => {
-  const res = await api.post(`/logout`);
-  if (res.status !== 200) {
-    throw new Error('Logout failed');
+  try {
+    const res = await api.post(`/logout`);
+    removeToken(); // Remove token from localStorage
+    if (res.status !== 200) {
+      throw new Error('Logout failed');
+    }
+  } catch (error) {
+    // Even if logout fails on server, remove token locally
+    removeToken();
+    throw error;
   }
 };
 
 export const checkAuth = async () => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('No token found');
+  }
+  
   const response = await api.get(`/check`);
-  return response.data;
+  return response.data.data;
 };
 
 // Content/admin API
 const contentApi = axios.create({ baseURL: CONTENT_URL, withCredentials: true });
+
+// Add request interceptor to include JWT token in headers for content API
+contentApi.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const createVolume = async (number) => {
   const res = await contentApi.post(`/volumes`, { number });
@@ -77,9 +133,23 @@ export const listSubmittedArticles = async () => {
   return res.data.data;
 };
 
+export const listPublishedArticles = async () => {
+  const res = await contentApi.get(`/articles/published`);
+  return res.data.data;
+};
+
 export const publishArticle = async (articleId, issueId) => {
   const res = await contentApi.post(`/articles/${articleId}/publish`, { issueId });
   return res.data.data;
+};
+
+export const createAndPublishArticle = async (formData) => {
+  const response = await contentApi.post('/articles/create-publish', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data.data;
 };
 
 export const fetchIssue = async (issueId) => {
