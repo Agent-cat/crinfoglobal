@@ -3,7 +3,14 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 export const Protected = async (req, res, next) => {
     try {
-        const token = req.cookies?.jwt;
+        // Try to get token from cookie first, then from Authorization header
+        let token = req.cookies?.jwt;
+        if (!token) {
+            const authHeader = req.headers.authorization;
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                token = authHeader.substring(7);
+            }
+        }
         if (!token) {
             return res
                 .status(401)
@@ -16,7 +23,6 @@ export const Protected = async (req, res, next) => {
         if (!decoded) {
             return res.status(401).json({ message: "Unauthorized - Invalid Token" });
         }
-        console.log(decoded);
         const user = await prisma.user.findUnique({
             where: {
                 id: decoded.userId,
