@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { checkAuth, listPublishedArticles } from '../../../utils/api';
+import { checkAuth, listPublishedArticles, updateArticle } from '../../../utils/api';
 
 const PublishedArticlesPage = () => {
   const router = useRouter();
@@ -10,6 +10,8 @@ const PublishedArticlesPage = () => {
   const [user, setUser] = useState(null);
   const [publishedArticles, setPublishedArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingArticle, setEditingArticle] = useState(null);
+  const [editForm, setEditForm] = useState({});
 
   useEffect(() => {
     const init = async () => {
@@ -30,6 +32,39 @@ const PublishedArticlesPage = () => {
     };
     init();
   }, []);
+
+  const handleEditClick = (article) => {
+    setEditingArticle(article);
+    setEditForm({
+      title: article.title || '',
+      abstract: article.abstract || '',
+      keywords: article.keywords || '',
+      doi: article.doi || '',
+      totalPages: article.totalPages || '',
+      articleType: article.articleType || 'Research Article',
+    });
+  };
+
+  const handleEditSave = async () => {
+    if (!editingArticle) return;
+    try {
+      await updateArticle(editingArticle.id, editForm);
+      // Refresh the articles list
+      const articles = await listPublishedArticles();
+      setPublishedArticles(articles);
+      setEditingArticle(null);
+      setEditForm({});
+      alert('Article updated successfully!');
+    } catch (error) {
+      console.error('Failed to update article:', error);
+      alert('Failed to update article: ' + error.message);
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingArticle(null);
+    setEditForm({});
+  };
 
   if (!authLoaded) {
     return (
@@ -195,7 +230,15 @@ const PublishedArticlesPage = () => {
 
                     {/* Footer */}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                      <span className="text-xs font-medium text-gray-500">Click to view details</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditClick(a);
+                        }}
+                        className="px-3 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                      >
+                        ✏️ Edit
+                      </button>
                       <svg className="w-5 h-5 text-gray-400 group-hover:text-[#083b7a] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
@@ -212,6 +255,107 @@ const PublishedArticlesPage = () => {
             </div>
           )}
         </div>
+
+        {/* Edit Modal */}
+        {editingArticle && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <h2 className="text-2xl font-bold mb-4 text-gray-800">Edit Article</h2>
+                
+                <div className="space-y-4">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input
+                      type="text"
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                      value={editForm.title}
+                      onChange={(e) => setEditForm({...editForm, title: e.target.value})}
+                    />
+                  </div>
+
+                  {/* Article Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Article Type</label>
+                    <select
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                      value={editForm.articleType}
+                      onChange={(e) => setEditForm({...editForm, articleType: e.target.value})}
+                    >
+                      <option value="Research Article">Research Article</option>
+                      <option value="Review Article">Review Article</option>
+                      <option value="Case Study">Case Study</option>
+                      <option value="Short Communication">Short Communication</option>
+                      <option value="Editorial">Editorial</option>
+                    </select>
+                  </div>
+
+                  {/* Abstract */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Abstract</label>
+                    <textarea
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                      rows="6"
+                      value={editForm.abstract}
+                      onChange={(e) => setEditForm({...editForm, abstract: e.target.value})}
+                    />
+                  </div>
+
+                  {/* Keywords */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
+                    <input
+                      type="text"
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                      value={editForm.keywords}
+                      onChange={(e) => setEditForm({...editForm, keywords: e.target.value})}
+                      placeholder="Separate with commas"
+                    />
+                  </div>
+
+                  {/* DOI */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">DOI</label>
+                    <input
+                      type="text"
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                      value={editForm.doi}
+                      onChange={(e) => setEditForm({...editForm, doi: e.target.value})}
+                    />
+                  </div>
+
+                  {/* Total Pages */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Pages</label>
+                    <input
+                      type="number"
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                      value={editForm.totalPages}
+                      onChange={(e) => setEditForm({...editForm, totalPages: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                {/* Modal Actions */}
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={handleEditSave}
+                    className="flex-1 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors font-medium"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    onClick={handleEditCancel}
+                    className="flex-1 px-4 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

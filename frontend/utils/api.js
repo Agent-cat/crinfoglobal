@@ -118,6 +118,26 @@ export const listVolumes = async () => {
   return res.data.data;
 };
 
+export const updateVolume = async (volumeId, number) => {
+  const res = await contentApi.put(`/volumes/${volumeId}`, { number });
+  return res.data.data;
+};
+
+export const deleteVolume = async (volumeId) => {
+  const res = await contentApi.delete(`/volumes/${volumeId}`);
+  return res.data;
+};
+
+export const updateIssue = async (issueId, number, month, year) => {
+  const res = await contentApi.put(`/issues/${issueId}`, { number, month, year });
+  return res.data.data;
+};
+
+export const deleteIssue = async (issueId) => {
+  const res = await contentApi.delete(`/issues/${issueId}`);
+  return res.data;
+};
+
 export const listPublicVolumes = async () => {
   const res = await contentApi.get(`/public/volumes`);
   return res.data.data;
@@ -140,6 +160,11 @@ export const listPublishedArticles = async () => {
 
 export const publishArticle = async (articleId, issueId) => {
   const res = await contentApi.post(`/articles/${articleId}/publish`, { issueId });
+  return res.data.data;
+};
+
+export const updateArticle = async (articleId, data) => {
+  const res = await contentApi.put(`/articles/${articleId}`, data);
   return res.data.data;
 };
 

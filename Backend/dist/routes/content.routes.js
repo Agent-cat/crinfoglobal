@@ -36,6 +36,58 @@ router.post('/volumes/:volumeId/issues', Protected, RequireEditor, async (req, r
         res.status(400).json({ message: e.message });
     }
 });
+// Update volume
+router.put('/volumes/:volumeId', Protected, RequireEditor, async (req, res) => {
+    const { volumeId } = req.params;
+    const { number } = req.body;
+    try {
+        const volume = await prisma.volume.update({
+            where: { id: volumeId },
+            data: { number },
+        });
+        res.status(200).json({ message: 'Updated', data: volume });
+    }
+    catch (e) {
+        res.status(400).json({ message: e.message });
+    }
+});
+// Delete volume
+router.delete('/volumes/:volumeId', Protected, RequireEditor, async (req, res) => {
+    const { volumeId } = req.params;
+    try {
+        await prisma.volume.delete({ where: { id: volumeId } });
+        res.status(200).json({ message: 'Deleted' });
+    }
+    catch (e) {
+        res.status(400).json({ message: e.message });
+    }
+});
+// Update issue
+router.put('/issues/:issueId', Protected, RequireEditor, async (req, res) => {
+    const { issueId } = req.params;
+    const { number, month, year } = req.body;
+    try {
+        const issue = await prisma.issue.update({
+            where: { id: issueId },
+            data: { number, month, year },
+        });
+        res.status(200).json({ message: 'Updated', data: issue });
+    }
+    catch (e) {
+        res.status(400).json({ message: e.message });
+    }
+});
+// Delete issue
+router.delete('/issues/:issueId', Protected, RequireEditor, async (req, res) => {
+    const { issueId } = req.params;
+    try {
+        await prisma.issue.delete({ where: { id: issueId } });
+        res.status(200).json({ message: 'Deleted' });
+    }
+    catch (e) {
+        res.status(400).json({ message: e.message });
+    }
+});
 // Submission: create Article in SUBMITTED state
 router.post('/articles', Protected, upload.fields([
     { name: 'pdf', maxCount: 1 },
@@ -147,6 +199,34 @@ router.post('/articles/:articleId/publish', Protected, RequireEditor, async (req
             data: { issueId, status: 'PUBLISHED' },
         });
         res.status(200).json({ message: 'Published', data: updated });
+    }
+    catch (e) {
+        res.status(400).json({ message: e.message });
+    }
+});
+// Editor: update Article
+router.put('/articles/:articleId', Protected, RequireEditor, async (req, res) => {
+    const { articleId } = req.params;
+    const { title, abstract, keywords, doi, totalPages, articleType } = req.body;
+    try {
+        const updateData = {};
+        if (title !== undefined)
+            updateData.title = title;
+        if (abstract !== undefined)
+            updateData.abstract = abstract;
+        if (keywords !== undefined)
+            updateData.keywords = keywords;
+        if (doi !== undefined)
+            updateData.doi = doi;
+        if (totalPages !== undefined)
+            updateData.totalPages = parseInt(totalPages);
+        if (articleType !== undefined)
+            updateData.articleType = articleType;
+        const updated = await prisma.article.update({
+            where: { id: articleId },
+            data: updateData,
+        });
+        res.status(200).json({ message: 'Updated', data: updated });
     }
     catch (e) {
         res.status(400).json({ message: e.message });
