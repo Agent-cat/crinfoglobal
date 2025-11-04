@@ -8,8 +8,17 @@ import {
 export const useDownloadRequests = () => {
   return useQuery({
     queryKey: ['downloadRequests'],
-    queryFn: listDownloadRequests,
-    staleTime: 1 * 60 * 1000, // 1 minute
+    queryFn: async () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Fetching download requests...');
+      }
+      const data = await listDownloadRequests();
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Download requests fetched:', data?.length || 0, 'items');
+      }
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes (match global default)
   });
 };
 

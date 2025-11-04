@@ -107,7 +107,7 @@ const SignupPage = () => {
                 disabled={isVerifying}
                 className="w-full px-4 py-3 font-semibold text-white bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] rounded-lg hover:from-[#083b7a]/90 hover:to-[#0a4ea3]/90 focus:outline-none focus:ring-2 focus:ring-[#0a4ea3] focus:ring-offset-2 transition-all duration-200 shadow-lg disabled:opacity-50"
               >
-                {isVerifying ? "Verifying..." : "✅ Verify OTP"}
+                {isVerifying ? "Verifying..." : " Verify OTP"}
               </button>
               <button
                 type="button"

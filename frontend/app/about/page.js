@@ -14,7 +14,7 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-white mt-16 py-8 px-5" style={cssVars}>
+    <div className="min-h-screen bg-white text-justify mt-16 py-8 px-5" style={cssVars}>
       <div className="max-w-4xl mx-auto" style={{ color: 'var(--text-color)' }}>
         <header className="mb-6 pb-3 border-b-4" style={{ borderColor: 'var(--primary-blue)' }}>
           <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--dark-blue)' }}>Frontiers in Engineering and Informatics</h1>

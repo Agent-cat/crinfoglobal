@@ -10,8 +10,17 @@ import {
 export const useSubmittedArticles = () => {
   return useQuery({
     queryKey: ['articles', 'submitted'],
-    queryFn: listSubmittedArticles,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    queryFn: async () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Fetching submitted articles...');
+      }
+      const data = await listSubmittedArticles();
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Submitted articles fetched:', data?.length || 0, 'items');
+      }
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes (match global default)
   });
 };
 
@@ -19,8 +28,17 @@ export const useSubmittedArticles = () => {
 export const usePublishedArticles = () => {
   return useQuery({
     queryKey: ['articles', 'published'],
-    queryFn: listPublishedArticles,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    queryFn: async () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Fetching published articles...');
+      }
+      const data = await listPublishedArticles();
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Published articles fetched:', data?.length || 0, 'items');
+      }
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes (match global default)
   });
 };
 

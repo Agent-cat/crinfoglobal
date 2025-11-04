@@ -1,14 +1,15 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { checkAuth, listSubmittedArticles, listVolumes, publishArticle, listPublishedArticles } from '../../../utils/api';
 
 const SubmittedArticlesPage = () => {
+  const router = useRouter();
   const [authLoaded, setAuthLoaded] = useState(false);
   const [user, setUser] = useState(null);
   const [submittedArticles, setSubmittedArticles] = useState([]);
   const [volumes, setVolumes] = useState([]);
-  const [expandedArticleId, setExpandedArticleId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState({});
 
@@ -95,7 +96,7 @@ const SubmittedArticlesPage = () => {
   }
 
   return (
-    <div className="min-h-screen w-full text-black bg-white mt-16 py-8 px-5">
+    <div className="min-h-screen w-full text-justify text-black bg-white mt-16 py-8 px-5">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
@@ -147,101 +148,69 @@ const SubmittedArticlesPage = () => {
               ))}
             </div>
           ) : submittedArticles.length > 0 ? (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {submittedArticles.map(a => (
-                <div key={a.id} className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                    {/* Article Info */}
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-800 mb-2 text-lg">{a.title}</div>
-                      <div className="text-sm text-gray-600 mb-2">{a.articleType}</div>
-                      
-                      {/* Article Details */}
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
-                        {a.totalPages && (
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">Pages:</span>
-                            <span>{a.totalPages}</span>
-                          </div>
-                        )}
-                        {a.createdAt && (
-                          <div className="flex items-center gap-1">
-                            <span className="font-medium">Submitted:</span>
-                            <span>{new Date(a.createdAt).toLocaleDateString()}</span>
-                          </div>
-                        )}
+                <div 
+                  key={a.id} 
+                  className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                  onClick={() => router.push(`/admin/submitted/${a.id}`)}
+                >
+                  <div className="p-5">
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 text-lg mb-2 group-hover:text-[#083b7a] transition-colors line-clamp-2">
+                          {a.title}
+                        </h3>
+                        <span className="inline-block px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded">
+                          {a.articleType}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <button
-                        className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-sm transition-colors"
-                        onClick={() => setExpandedArticleId(expandedArticleId === a.id ? null : a.id)}
-                      >
-                        {expandedArticleId === a.id ? 'Hide Details' : 'View Details'}
-                      </button>
-                      {a.pdfPath && (
-                        <a 
-                          className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm transition-colors text-center"
-                          href={a.pdfPath.startsWith('/api/') ? `http://localhost:8000${a.pdfPath}` : a.pdfPath} 
-                          target="_blank" 
-                          rel="noreferrer"
-                        >
-                          Download PDF
-                        </a>
+                    {/* Abstract Preview */}
+                    {a.abstract && (
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+                        {a.abstract}
+                      </p>
+                    )}
+
+                    {/* Meta Info */}
+                    <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-4">
+                      {a.totalPages && (
+                        <div className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <span>{a.totalPages} pages</span>
+                        </div>
                       )}
+                      {a.createdAt && (
+                        <div className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span>{new Date(a.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                      {a.keywords && (
+                        <div className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                          </svg>
+                          <span className="line-clamp-1">{a.keywords.split(',').length} keywords</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <span className="text-xs font-medium text-gray-500">Click to view details</span>
+                      <svg className="w-5 h-5 text-gray-400 group-hover:text-[#083b7a] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </div>
-                  
-                  {/* Expanded Details */}
-                  {expandedArticleId === a.id && (
-                    <div className="text-sm text-gray-700 border-t pt-4 mt-4 space-y-3">
-                      {a.keywords && (
-                        <div>
-                          <span className="font-medium">Keywords:</span>
-                          <span className="ml-2">{a.keywords}</span>
-                        </div>
-                      )}
-                      {a.abstract && (
-                        <div>
-                          <div className="font-medium mb-2">Abstract</div>
-                          <div className="whitespace-pre-wrap text-gray-600 bg-gray-50 p-3 rounded">
-                            {a.abstract}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Publish Section */}
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <div className="font-medium mb-3 text-blue-800">Publish Article</div>
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          <select 
-                            className="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                            defaultValue=""
-                            id={`issue-select-${a.id}`}
-                          >
-                            <option value="" disabled>Select Issue</option>
-                            {volumes.flatMap(v => (v.issues || []).map(i => ({ ...i, volumeNumber: v.number }))).map(i => (
-                              <option key={i.id} value={i.id}>
-                                Vol {i.volumeNumber} - Issue {i.number} ({i.month} {i.year})
-                              </option>
-                            ))}
-                          </select>
-                          <button 
-                            className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            onClick={() => {
-                              const select = document.getElementById(`issue-select-${a.id}`);
-                              handlePublish(a.id, select.value);
-                            }}
-                            disabled={publishing[a.id]}
-                          >
-                            {publishing[a.id] ? 'Publishing...' : 'Publish'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>

@@ -30,6 +30,7 @@ const PublishArticlesPage = () => {
     doi: '',
     issueId: '',
     file: null,
+    scriptFile: null,
     authors: [{ name: '', email: '', affiliation: '', superscript: '' }]
   });
   const [submitting, setSubmitting] = useState(false);
@@ -112,6 +113,10 @@ const PublishArticlesPage = () => {
         formData.append('file', publishForm.file);
       }
       
+      if (publishForm.scriptFile) {
+        formData.append('script', publishForm.scriptFile);
+      }
+      
       // Use TanStack Query mutation
       await createAndPublishMutation.mutateAsync(formData);
       
@@ -126,6 +131,7 @@ const PublishArticlesPage = () => {
         doi: '',
         issueId: '',
         file: null,
+        scriptFile: null,
         authors: [{ name: '', email: '', affiliation: '', superscript: '' }]
       });
       
@@ -186,6 +192,20 @@ const PublishArticlesPage = () => {
                   />
                   <p className="text-sm text-gray-500 mt-1">
                     {publishForm.file ? publishForm.file.name : 'No file chosen'}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Upload Script File (Optional)
+                  </label>
+                  <input
+                    type="file"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                    onChange={(e) => setPublishForm(prev => ({ ...prev, scriptFile: e.target.files[0] }))}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    {publishForm.scriptFile ? publishForm.scriptFile.name : 'Upload any scripts or code files related to the research'}
                   </p>
                 </div>
 

@@ -74,16 +74,16 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="min-h-screen w-full text-black bg-white mt-16 py-8 px-5">
+    <div className="min-h-screen w-full text-justify text-black bg-white mt-16 py-8 px-5">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl md:text-3xl font-bold">Admin Panel</h1>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/admin/submitted" className="px-4 py-2 rounded-lg bg-black text-white  transition-colors text-sm">
-              📝 Submitted Articles
+              Submitted Articles
             </Link>
             <Link href="/admin/published" className="px-4 py-2 rounded-lg bg-black text-white  transition-colors text-sm">
-              📚 Published Articles
+               Published Articles
             </Link>
             <Link href="/admin/publish" className="px-4 py-2 rounded-lg bg-[#083b7a] text-white hover:bg-[#0a4ea3] transition-colors text-sm">
               📨 Publish Articles

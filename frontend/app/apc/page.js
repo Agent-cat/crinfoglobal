@@ -7,7 +7,7 @@ const page = () => {
   const lightBlue = '#e6f0ff'
 
   return (
-    <div className='min-h-screen text-black pt-16 bg-white py-8 px-6'>
+    <div className='min-h-screen text-justify text-black pt-16 bg-white py-8 px-6'>
       <div className="max-w-4xl mx-auto">
         <header style={{ marginBottom: 32, borderBottom: `3px solid ${primaryBlue}`, paddingBottom: 16 }}>
           <h1 style={{ color: darkBlue, fontSize: 36, margin: 0, fontWeight: 'bold' }}>Article Processing Charge</h1>
