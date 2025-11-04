@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/token.js";
-import { generateOTP, sendOTPEmail } from "../services/email.service.js";
+import { generateOTP } from "../services/email.service.js";
+import { queueOTPEmail } from "../services/emailQueue.service.js";
 const prisma = new PrismaClient();
 export const Signin = async (req, res) => {
     const { email, password } = req.body;
@@ -59,10 +60,14 @@ export const Signup = async (req, res) => {
                 otpExpiresAt: otpExpiresAt
             },
         });
-        // Send OTP email
-        const emailSent = await sendOTPEmail(email, otp);
-        if (!emailSent) {
-            return res.status(500).json({ message: "Failed to send verification email" });
+        // Queue OTP email (non-blocking)
+        try {
+            const jobId = queueOTPEmail(email, otp);
+            console.log('OTP email queued:', jobId);
+        }
+        catch (emailError) {
+            console.error('Failed to queue OTP email:', emailError);
+            // Continue anyway - user can request resend if needed
         }
         res.status(200).json({
             message: "User created successfully. Please check your email for verification code.",
@@ -220,10 +225,14 @@ export const ResendOTP = async (req, res) => {
                 otpExpiresAt: otpExpiresAt,
             },
         });
-        // Send OTP email
-        const emailSent = await sendOTPEmail(email, otp);
-        if (!emailSent) {
-            return res.status(500).json({ message: "Failed to send verification email" });
+        // Queue OTP email (non-blocking)
+        try {
+            const jobId = queueOTPEmail(email, otp);
+            console.log('OTP email queued:', jobId);
+        }
+        catch (emailError) {
+            console.error('Failed to queue OTP email:', emailError);
+            // Continue anyway - user can request resend if needed
         }
         res.status(200).json({ message: "OTP sent successfully" });
     }

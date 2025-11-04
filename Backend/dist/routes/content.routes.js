@@ -5,7 +5,7 @@ import { RequireEditor } from '../middlewares/auth.middleware.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { sendEditorNotificationEmail } from '../services/email.service.js';
+import { queueEditorNotification, queueUserConfirmation } from '../services/emailQueue.service.js';
 const uploadDir = path.join(process.cwd(), 'uploads', 'articles');
 const storage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadDir),
@@ -37,19 +37,25 @@ router.post('/volumes/:volumeId/issues', Protected, RequireEditor, async (req, r
     }
 });
 // Submission: create Article in SUBMITTED state
-router.post('/articles', Protected, upload.single('pdf'), async (req, res) => {
+router.post('/articles', Protected, upload.fields([
+    { name: 'pdf', maxCount: 1 },
+    { name: 'attachments', maxCount: 1 },
+    { name: 'script', maxCount: 1 }
+]), async (req, res) => {
     const { title, articleType, keywords, abstract, conflictOfInterest, fundingInfo, dataAvailability, authors } = req.body;
     try {
         if (!title || !articleType || !abstract) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
+        // Handle multiple file uploads
+        const files = req.files;
         // compute pages if a PDF was uploaded (best-effort heuristic)
         let pdfPublicPath = null;
         let totalPages = null;
-        if (req.file?.path) {
-            pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(req.file.path)}`;
+        if (files?.pdf?.[0]?.path) {
+            pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(files.pdf[0].path)}`;
             try {
-                const buffer = fs.readFileSync(req.file.path);
+                const buffer = fs.readFileSync(files.pdf[0].path);
                 const text = buffer.toString('latin1');
                 const matches = text.match(/\/Type\s*\/Page\b/g);
                 if (matches && matches.length > 0) {
@@ -59,6 +65,16 @@ router.post('/articles', Protected, upload.single('pdf'), async (req, res) => {
             catch (_) {
                 // ignore page count errors, leave null
             }
+        }
+        // Handle attachments (ZIP file)
+        let attachmentsPath = null;
+        if (files?.attachments?.[0]?.path) {
+            attachmentsPath = `/api/content/public/articles/attachments/${path.basename(files.attachments[0].path)}`;
+        }
+        // Handle script file
+        let scriptPath = null;
+        if (files?.script?.[0]?.path) {
+            scriptPath = `/api/content/public/articles/scripts/${path.basename(files.script[0].path)}`;
         }
         const article = await prisma.article.create({
             data: {
@@ -75,14 +91,44 @@ router.post('/articles', Protected, upload.single('pdf'), async (req, res) => {
                 status: 'SUBMITTED',
             },
         });
-        // Send email notification to editors
+        // Queue email notifications asynchronously (non-blocking)
         try {
-            await sendEditorNotificationEmail(article);
-            console.log('Editor notification email sent successfully');
+            // Fetch all editors from the database
+            const editors = await prisma.user.findMany({
+                where: {
+                    role: 'EDITOR',
+                    emailVerified: true, // Only send to verified editors
+                },
+                select: {
+                    email: true,
+                },
+            });
+            const editorEmails = editors.map(editor => editor.email);
+            if (editorEmails.length > 0) {
+                console.log(`Found ${editorEmails.length} verified editor(s) in database`);
+            }
+            else {
+                console.warn('No verified editors found in database, using fallback email');
+            }
+            // Queue editor notification (non-blocking)
+            const jobId = queueEditorNotification(article, pdfPublicPath || undefined, editorEmails);
+            console.log('Editor notification email queued:', jobId);
         }
         catch (emailError) {
-            console.error('Failed to send editor notification email:', emailError);
-            // Don't fail the submission if email fails
+            console.error('Failed to queue editor notification email:', emailError);
+            // Don't fail the submission if email queueing fails
+        }
+        // Queue confirmation email to user (non-blocking)
+        try {
+            const userEmail = req.user.email;
+            if (userEmail) {
+                const jobId = queueUserConfirmation(userEmail, article);
+                console.log('User confirmation email queued:', jobId);
+            }
+        }
+        catch (emailError) {
+            console.error('Failed to queue user confirmation email:', emailError);
+            // Don't fail the submission if email queueing fails
         }
         res.status(201).json({ message: 'Submitted', data: article });
     }
@@ -107,7 +153,10 @@ router.post('/articles/:articleId/publish', Protected, RequireEditor, async (req
     }
 });
 // Editor: create and publish article directly
-router.post('/articles/create-publish', Protected, RequireEditor, upload.single('file'), async (req, res) => {
+router.post('/articles/create-publish', Protected, RequireEditor, upload.fields([
+    { name: 'file', maxCount: 1 },
+    { name: 'script', maxCount: 1 }
+]), async (req, res) => {
     const { title, abstract, keywords, pages, doi, issueId, authors } = req.body;
     try {
         if (!title || !abstract || !issueId) {
@@ -130,13 +179,15 @@ router.post('/articles/create-publish', Protected, RequireEditor, upload.single(
                 return res.status(400).json({ message: 'All authors must have name and email' });
             }
         }
-        // Handle file upload
+        // Handle multiple file uploads
+        const files = req.files;
+        // Handle PDF file upload
         let pdfPublicPath = null;
         let totalPages = null;
-        if (req.file?.path) {
-            pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(req.file.path)}`;
+        if (files?.file?.[0]?.path) {
+            pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(files.file[0].path)}`;
             try {
-                const buffer = fs.readFileSync(req.file.path);
+                const buffer = fs.readFileSync(files.file[0].path);
                 const text = buffer.toString('latin1');
                 const matches = text.match(/\/Type\s*\/Page\b/g);
                 if (matches && matches.length > 0) {
@@ -146,6 +197,11 @@ router.post('/articles/create-publish', Protected, RequireEditor, upload.single(
             catch (_) {
                 // ignore page count errors, leave null
             }
+        }
+        // Handle script file
+        let scriptPath = null;
+        if (files?.script?.[0]?.path) {
+            scriptPath = `/api/content/public/articles/scripts/${path.basename(files.script[0].path)}`;
         }
         // Use pages from form if provided, otherwise use calculated pages
         const finalPages = pages ? parseInt(pages) : totalPages;

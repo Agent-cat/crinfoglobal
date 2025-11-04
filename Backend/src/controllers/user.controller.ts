@@ -2,7 +2,8 @@ import { PrismaClient } from "@prisma/client";
 
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/token.js";
-import { generateOTP, sendOTPEmail } from "../services/email.service.js";
+import { generateOTP } from "../services/email.service.js";
+import { queueOTPEmail } from "../services/emailQueue.service.js";
 const prisma = new PrismaClient();
 
 export const Signin = async (req: any, res: any) => {
@@ -71,10 +72,13 @@ export const Signup = async (req: any, res: any) => {
       },
     });
 
-    // Send OTP email
-    const emailSent = await sendOTPEmail(email, otp);
-    if (!emailSent) {
-      return res.status(500).json({ message: "Failed to send verification email" });
+    // Queue OTP email (non-blocking)
+    try {
+      const jobId = queueOTPEmail(email, otp);
+      console.log('OTP email queued:', jobId);
+    } catch (emailError) {
+      console.error('Failed to queue OTP email:', emailError);
+      // Continue anyway - user can request resend if needed
     }
 
     res.status(200).json({ 
@@ -251,10 +255,13 @@ export const ResendOTP = async (req: any, res: any) => {
       },
     });
 
-    // Send OTP email
-    const emailSent = await sendOTPEmail(email, otp);
-    if (!emailSent) {
-      return res.status(500).json({ message: "Failed to send verification email" });
+    // Queue OTP email (non-blocking)
+    try {
+      const jobId = queueOTPEmail(email, otp);
+      console.log('OTP email queued:', jobId);
+    } catch (emailError) {
+      console.error('Failed to queue OTP email:', emailError);
+      // Continue anyway - user can request resend if needed
     }
 
     res.status(200).json({ message: "OTP sent successfully" });
