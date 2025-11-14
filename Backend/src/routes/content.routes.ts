@@ -322,14 +322,24 @@ router.post('/articles/create-publish', Protected, RequireEditor, upload.fields(
 
 // Fetch for admin panel
 router.get('/volumes', Protected, RequireEditor, async (_req: any, res: any) => {
-  const volumes = await prisma.volume.findMany({ include: { issues: true } });
+  const volumes = await prisma.volume.findMany({ 
+    include: { 
+      issues: { 
+        orderBy: { createdAt: 'asc' } 
+      } 
+    } 
+  });
   res.json({ data: volumes });
 });
 
 // Public fetch volumes with issues (no articles) for site display
 router.get('/public/volumes', async (_req: any, res: any) => {
   const volumes = await prisma.volume.findMany({
-    include: { issues: true },
+    include: { 
+      issues: { 
+        orderBy: { createdAt: 'asc' } 
+      } 
+    },
     orderBy: { number: 'desc' },
   });
   res.json({ data: volumes });

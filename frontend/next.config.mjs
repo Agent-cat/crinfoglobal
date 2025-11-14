@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     
- reactCompiler: true,
-  cacheComponents: true,
+reactCompiler: true,
+cacheComponents: true,
     
 };
 
