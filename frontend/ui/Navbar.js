@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -16,9 +15,7 @@ const Navbar = () => {
   const router = useRouter();
 
   const isActive = (href) =>
-    href === "/"
-      ? pathname === "/"
-      : pathname.startsWith(href);
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   // Check for user authentication (cookie-based)
   useEffect(() => {
@@ -43,12 +40,12 @@ const Navbar = () => {
       setAuthLoaded(true);
     };
 
-    authEvents.subscribe('loginSuccess', handleLogin);
-    authEvents.subscribe('logoutSuccess', handleLogoutEvent);
+    authEvents.subscribe("loginSuccess", handleLogin);
+    authEvents.subscribe("logoutSuccess", handleLogoutEvent);
 
     return () => {
-      authEvents.unsubscribe('loginSuccess', handleLogin);
-      authEvents.unsubscribe('logoutSuccess', handleLogoutEvent);
+      authEvents.unsubscribe("loginSuccess", handleLogin);
+      authEvents.unsubscribe("logoutSuccess", handleLogoutEvent);
     };
   }, []);
 
@@ -57,11 +54,9 @@ const Navbar = () => {
       await apiLogout();
       setUser(null);
       setIsProfileOpen(false);
-      authEvents.dispatch('logoutSuccess');
-      router.push('/');
-    } catch (e) {
-     
-    }
+      authEvents.dispatch("logoutSuccess");
+      router.push("/");
+    } catch (e) {}
   };
 
   return (
@@ -71,12 +66,16 @@ const Navbar = () => {
           {/* Branding */}
           <Link
             href="/"
-            className="text-xl md:text-2xl font-bold tracking-tight text-white hover:text-[#e6f0ff] transition-colors"
+            className="flex items-center hover:opacity-80 transition-opacity"
             aria-label="Company Logo - Home"
           >
-            CrinfoGlobal
+            <img
+              src="/fei.png"
+              alt="Frontiers in Engineering and Informatics"
+              className="h-12 scale-150 w-auto"
+            />
           </Link>
-          
+
           {/* Desktop NavLinks */}
           <div className="hidden md:flex flex-1 justify-center">
             <div className="flex items-center space-x-1">
@@ -102,21 +101,30 @@ const Navbar = () => {
                 ))}
             </div>
           </div>
-          
+
           {/* Desktop Auth Section */}
           <div className="hidden md:flex items-center space-x-2">
             {!authLoaded ? (
               <div className="w-32 h-8 rounded bg-white/10 animate-pulse" />
-            ) : (
-              user ? (
+            ) : user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center space-x-2 px-4 py-2 text-sm font-semibold rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-white/60"
                 >
                   <span>{user.userName || user.email}</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
                 {isProfileOpen && (
@@ -150,10 +158,9 @@ const Navbar = () => {
                   </button>
                 </Link>
               </>
-            )
             )}
           </div>
-          
+
           {/* Mobile Toggle */}
           <button
             type="button"
@@ -161,34 +168,50 @@ const Navbar = () => {
             aria-label="Open main menu"
             onClick={() => setIsOpen((open) => !open)}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+              />
             </svg>
           </button>
         </div>
-        
+
         {/* Mobile Nav */}
         {isOpen && (
           <div className="md:hidden bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] border-t border-[#083b7a] px-3 pt-3 pb-4 shadow-md/40">
             {/* Mobile NavLinks */}
             <div className="flex flex-col items-stretch space-y-1 mb-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`block w-full text-center px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
-                    isActive(link.href)
-                      ? "bg-white text-[#083b7a] shadow-sm font-semibold"
-                      : "text-white hover:bg-white/10 hover:shadow-sm"
-                  }`}
-                  aria-current={isActive(link.href) ? "page" : undefined}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks
+                .filter((link) => {
+                  if (!link.requiresRole) return true;
+                  if (!authLoaded) return false;
+                  return user && user.role === link.requiresRole;
+                })
+                .map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`block w-full text-center px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
+                      isActive(link.href)
+                        ? "bg-white text-[#083b7a] shadow-sm font-semibold"
+                        : "text-white hover:bg-white/10 hover:shadow-sm"
+                    }`}
+                    aria-current={isActive(link.href) ? "page" : undefined}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
             </div>
-            
+
             {/* Mobile Auth Section */}
             <div className="flex flex-col items-center space-y-2">
               {!authLoaded ? (

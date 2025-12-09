@@ -1,9 +1,9 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8000/api/auth";
-const CONTENT_URL = "http://localhost:8000/api/content";
+const API_URL = "http://10.123.22.158:8000/api/auth";
+const CONTENT_URL = "http://10.123.22.158:8000/api/content";
 
-// Get token from localStorage
+
 const getToken = () => {
   if (typeof window !== 'undefined') {
     return localStorage.getItem('jwt');

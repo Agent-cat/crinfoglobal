@@ -1,11 +1,19 @@
-
 import React from "react";
 import Link from "next/link";
-import { BookOpen, Award, Globe, Users, FileText, TrendingUp, CheckCircle, ExternalLink } from "lucide-react";
+import {
+  BookOpen,
+  Award,
+  Globe,
+  Users,
+  FileText,
+  TrendingUp,
+  CheckCircle,
+  ExternalLink,
+} from "lucide-react";
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white text-justify">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] text-white py-20 mt-16">
         <div className="absolute inset-0 bg-black/10"></div>
@@ -18,9 +26,10 @@ const HomePage = () => {
               ISSN: 3049-3412 (Online)
             </p>
             <p className="text-lg md:text-xl max-w-4xl mx-auto mb-8 text-blue-50 leading-relaxed">
-              Dedicated to publishing high-quality research that advances the fields of engineering and informatics. 
-              We welcome original research papers, state-of-the-art reviews, and technical notes that contribute to 
-              theoretical and practical advancements.
+              Dedicated to publishing high-quality research that advances the
+              fields of engineering and informatics. We welcome original
+              research papers, state-of-the-art reviews, and technical notes
+              that contribute to theoretical and practical advancements.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/submit">
@@ -81,15 +90,17 @@ const HomePage = () => {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Supported By</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Supported By
+            </h2>
             <div className="w-24 h-1 bg-[#083b7a] mx-auto rounded-full"></div>
           </div>
-          
+
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto border border-gray-100">
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="flex-shrink-0">
                 <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#083b7a] to-[#0a4ea3] flex items-center justify-center text-white">
-                 <img src="https://crinfoglobal.com/Human.jpg" alt="" />
+                  <img src="https://crinfoglobal.com/Human.jpg" alt="" />
                 </div>
               </div>
               <div className="flex-1 text-center md:text-left">
@@ -98,8 +109,57 @@ const HomePage = () => {
                 </h3>
                 <p className="text-lg text-gray-600 mb-2">South Korea</p>
                 <p className="text-gray-700 leading-relaxed">
-                  Our publication is proudly supported by the <span className="font-semibold">Society of Human Centered Technology</span> based in South Korea. 
-                  This collaboration ensures our commitment to advancing research that puts human needs at the center of technological innovation.
+                  Our publication is proudly supported by the{" "}
+                  <span className="font-semibold">
+                    Society of Human Centered Technology
+                  </span>{" "}
+                  based in South Korea. This collaboration ensures our
+                  commitment to advancing research that puts human needs at the
+                  center of technological innovation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Editorial Sponsor Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Editorial Sponsor
+            </h2>
+            <div className="w-24 h-1 bg-[#083b7a] mx-auto rounded-full"></div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto border border-gray-100">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-shrink-0">
+                <div className="w-32 h-32 rounded-full  flex items-center justify-center text-white p-2">
+                  <img
+                    src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.jSQIqVHfK0h8av6QJKkK8gHaHZ%3Fpid%3DApi&f=1&ipt=cc721fe38adcaba38f02cf930974866482d6e6d7eb5e617fd1021ede545cd267&ipo=images"
+                    alt="KL University Logo"
+                    className="w-full h-full object-contain rounded-full"
+                  />
+                </div>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                  KL University
+                </h3>
+                <p className="text-lg text-gray-600 mb-2">
+                  Andhra Pradesh, India
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  We are honored to have{" "}
+                  <span className="font-semibold">KL University</span> as our
+                  editorial sponsor. Their prestigious academic excellence and
+                  commitment to research innovation greatly contribute to the
+                  quality and integrity of our publication. This partnership
+                  strengthens our mission to disseminate cutting-edge research
+                  in engineering and informatics to the global academic
+                  community.
                 </p>
               </div>
             </div>
@@ -111,10 +171,14 @@ const HomePage = () => {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Indexing and Abstracting</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Indexing and Abstracting
+            </h2>
             <div className="w-24 h-1 bg-[#083b7a] mx-auto rounded-full mb-6"></div>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Our journal is indexed and abstracted in renowned databases to ensure maximum visibility and accessibility for published research.
+              Our journal is indexed and abstracted in renowned databases to
+              ensure maximum visibility and accessibility for published
+              research.
             </p>
           </div>
 
@@ -122,20 +186,22 @@ const HomePage = () => {
             {/* Google Scholar */}
             <div className="flex flex-col items-center">
               <div className="w-48 h-48 flex items-center justify-center bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Scholar_logo.svg" 
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Scholar_logo.svg"
                   alt="Google Scholar"
                   className="w-full h-full object-contain"
                 />
               </div>
-              <p className="mt-4 text-sm font-medium text-gray-700">Google Scholar</p>
+              <p className="mt-4 text-sm font-medium text-gray-700">
+                Google Scholar
+              </p>
             </div>
 
             {/* Crossref */}
             <div className="flex flex-col items-center">
               <div className="w-48 h-48 flex items-center justify-center bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                <img 
-                  src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fipmuonline.com%2Fwp-content%2Fuploads%2F2021%2F04%2Fcrossref.jpg&f=1&nofb=1&ipt=bff95b089ed0e9da805bbc49f817bda609ddaaa868ba5e8424b8dbdd392978e8" 
+                <img
+                  src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fipmuonline.com%2Fwp-content%2Fuploads%2F2021%2F04%2Fcrossref.jpg&f=1&nofb=1&ipt=bff95b089ed0e9da805bbc49f817bda609ddaaa868ba5e8424b8dbdd392978e8"
                   alt="Crossref"
                   className="w-full h-full object-contain"
                 />
@@ -159,10 +225,13 @@ const HomePage = () => {
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Research Areas</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Research Areas
+            </h2>
             <div className="w-24 h-1 bg-[#083b7a] mx-auto rounded-full mb-6"></div>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              We publish cutting-edge research across diverse fields of engineering and informatics
+              We publish cutting-edge research across diverse fields of
+              engineering and informatics
             </p>
           </div>
 
@@ -219,7 +288,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
     </div>
   );
 };

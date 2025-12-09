@@ -1,112 +1,61 @@
-import React from 'react'
+import React from "react";
+import { ExternalLink } from "lucide-react";
 
-const page = () => {
-  const primaryBlue = '#0a4ea3'
-  const darkBlue = '#083b7a'
-  const textColor = '#1f2937'
-  const lightBlue = '#e6f0ff'
-
+const IndexingPage = () => {
   return (
-    <div className='min-h-screen text-black pt-16 bg-white py-8 px-6'>
-      <div className="max-w-4xl mx-auto">
-        <header style={{ marginBottom: 32, borderBottom: `3px solid ${primaryBlue}`, paddingBottom: 16 }}>
-          <h1 style={{ color: darkBlue, fontSize: 36, margin: 0, fontWeight: 'bold' }}>Indexing & Abstracting</h1>
-          <h2 style={{ color: primaryBlue, fontSize: 28, margin: '8px 0 0 0', fontWeight: 600 }}>Frontiers in Engineering and Informatics</h2>
-          <p style={{ margin: '8px 0 0 0', color: primaryBlue, fontWeight: 600, fontSize: 18 }}>ISSN: 3049-3412 (Online)</p>
-        </header>
+    <div className="min-h-screen bg-white py-16 mt-16 text-justify">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Indexing and Abstracting
+          </h1>
+          <div className="w-24 h-1 bg-[#083b7a] mx-auto rounded-full mb-6"></div>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Our journal is indexed and abstracted in renowned databases to
+            ensure maximum visibility and accessibility for published research.
+          </p>
+        </div>
 
-        <section style={{ background: lightBlue, padding: 24, borderRadius: 12, border: `1px solid ${primaryBlue}`, marginBottom: 32 }}>
-          <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Current Indexing & Abstracting</h2>
-          <p style={{ marginBottom: 16, fontSize: 16 }}>
-            The indexing and abstracting information for the journal "Frontiers in Engineering and Informatics" 
-            is currently being updated. We are actively working to include this journal in major indexing 
-            databases to ensure maximum visibility and accessibility for published research.
-          </p>
-        </section>
-
-        <section style={{ marginBottom: 32 }}>
-          <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Upcoming Indexing Plans</h2>
-          <p style={{ marginBottom: 16, fontSize: 16 }}>
-            We are in the process of applying for indexing in renowned databases, including:
-          </p>
-          <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20`, marginBottom: 16 }}>
-            <p style={{ fontWeight: 600, color: darkBlue, margin: 0 }}>YET TO BE RELEASED</p>
-          </div>
-          <p style={{ fontSize: 16 }}>
-            We appreciate your patience and support as we work towards making "Frontiers in Engineering and 
-            Informatics" a highly recognized journal in the academic community.
-          </p>
-        </section>
-
-        <section style={{ marginBottom: 32 }}>
-          <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Benefits of Indexing</h2>
-          <p style={{ marginBottom: 16, fontSize: 16 }}>
-            Indexing in reputable databases enhances the visibility, credibility, and accessibility of research 
-            articles. It ensures that authors' work reaches a broader audience and contributes to the global 
-            research community.
-          </p>
-          <div style={{ background: '#f0f9ff', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/30` }}>
-            <h3 style={{ color: darkBlue, fontSize: 18, marginTop: 0, marginBottom: 12 }}>Key Benefits Include:</h3>
-            <ul style={{ paddingLeft: 24, margin: 0 }}>
-              <li style={{ marginBottom: 8 }}>Enhanced visibility and discoverability of research</li>
-              <li style={{ marginBottom: 8 }}>Increased citation potential</li>
-              <li style={{ marginBottom: 8 }}>Improved academic reputation and credibility</li>
-              <li style={{ marginBottom: 8 }}>Broader reach to international research community</li>
-              <li style={{ marginBottom: 8 }}>Better indexing in search engines and academic databases</li>
-              <li style={{ marginBottom: 8 }}>Compliance with institutional and funding requirements</li>
-            </ul>
-          </div>
-        </section>
-
-        <section style={{ marginBottom: 32 }}>
-          <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Target Databases</h2>
-          <p style={{ marginBottom: 16, fontSize: 16 }}>
-            We are actively pursuing indexing in the following categories of databases:
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
-            <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
-              <h3 style={{ color: darkBlue, fontSize: 18, marginTop: 0, marginBottom: 12 }}>General Academic Databases</h3>
-              <ul style={{ paddingLeft: 20, margin: 0 }}>
-                <li style={{ marginBottom: 6 }}>Google Scholar</li>
-                <li style={{ marginBottom: 6 }}>Microsoft Academic</li>
-                <li style={{ marginBottom: 6 }}>ResearchGate</li>
-                <li style={{ marginBottom: 6 }}>Academia.edu</li>
-              </ul>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16 mb-12">
+          {/* Google Scholar */}
+          <div className="flex flex-col items-center">
+            <div className="w-48 h-48 flex items-center justify-center bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Scholar_logo.svg"
+                alt="Google Scholar"
+                className="w-full h-full object-contain"
+              />
             </div>
-            <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
-              <h3 style={{ color: darkBlue, fontSize: 18, marginTop: 0, marginBottom: 12 }}>Engineering Databases</h3>
-              <ul style={{ paddingLeft: 20, margin: 0 }}>
-                <li style={{ marginBottom: 6 }}>IEEE Xplore</li>
-                <li style={{ marginBottom: 6 }}>Engineering Village</li>
-                <li style={{ marginBottom: 6 }}>Compendex</li>
-                <li style={{ marginBottom: 6 }}>Inspec</li>
-              </ul>
-            </div>
-            <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
-              <h3 style={{ color: darkBlue, fontSize: 18, marginTop: 0, marginBottom: 12 }}>Computer Science Databases</h3>
-              <ul style={{ paddingLeft: 20, margin: 0 }}>
-                <li style={{ marginBottom: 6 }}>ACM Digital Library</li>
-                <li style={{ marginBottom: 6 }}>DBLP</li>
-                <li style={{ marginBottom: 6 }}>CiteSeerX</li>
-                <li style={{ marginBottom: 6 }}>arXiv</li>
-              </ul>
-            </div>
+            <p className="mt-4 text-sm font-medium text-gray-700">
+              Google Scholar
+            </p>
           </div>
-        </section>
 
-        <section style={{ background: '#f0f9ff', padding: 24, borderRadius: 12, border: `1px solid ${primaryBlue}/30` }}>
-          <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Stay Updated</h2>
-          <p style={{ marginBottom: 16, fontSize: 16 }}>
-            We will update this page as soon as indexing information becomes available. Authors and readers 
-            are encouraged to check back regularly for the latest updates on our indexing status.
-          </p>
-          <p style={{ fontSize: 16, fontWeight: 600, color: darkBlue }}>
-            For any queries regarding indexing, please contact us at: <span style={{ color: primaryBlue }}>indexing@crinfoglobal.com</span>
-          </p>
-        </section>
+          {/* Crossref */}
+          <div className="flex flex-col items-center">
+            <div className="w-48 h-48 flex items-center justify-center bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+              <img
+                src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fipmuonline.com%2Fwp-content%2Fuploads%2F2021%2F04%2Fcrossref.jpg&f=1&nofb=1&ipt=bff95b089ed0e9da805bbc49f817bda609ddaaa868ba5e8424b8dbdd392978e8"
+                alt="Crossref"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <p className="mt-4 text-sm font-medium text-gray-700">Crossref</p>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#083b7a] text-white rounded-lg font-semibold hover:bg-[#0a4ea3] transition-colors"
+          >
+            Back to Home
+            <ExternalLink className="w-5 h-5" />
+          </a>
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default IndexingPage;
