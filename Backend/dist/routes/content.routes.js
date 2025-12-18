@@ -1,5 +1,5 @@
 import express, {} from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../utils/prisma.js';
 import { Protected } from '../middlewares/auth.middleware.js';
 import { RequireEditor } from '../middlewares/auth.middleware.js';
 import multer from 'multer';
@@ -12,7 +12,6 @@ const storage = multer.diskStorage({
     filename: (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
 });
 const upload = multer({ storage });
-const prisma = new PrismaClient();
 const router = express.Router();
 // Volumes
 router.post('/volumes', Protected, RequireEditor, async (req, res) => {
