@@ -1,20 +1,18 @@
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../utils/prisma.js";
 
 export const Protected = async (req: any, res: any, next: any) => {
   try {
     // Try to get token from cookie first, then from Authorization header
     let token = req.cookies?.jwt;
-    
+
     if (!token) {
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
         token = authHeader.substring(7);
       }
     }
-    
+
     if (!token) {
       return res
         .status(401)

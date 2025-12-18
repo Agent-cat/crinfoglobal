@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   BookOpen,
   Award,
@@ -15,10 +16,10 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-white text-justify">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] text-white py-20 mt-16">
+      <section className="relative bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] text-white py-20 mt-16 overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
+          <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               Frontiers in Engineering and Informatics
             </h1>
@@ -33,12 +34,12 @@ const HomePage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/submit">
-                <button className="px-8 py-4 bg-white text-[#083b7a] rounded-lg font-semibold text-lg hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <button className="px-8 py-4 bg-white text-[#083b7a] rounded-lg font-semibold text-lg hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:scale-95">
                   Submit Your Research
                 </button>
               </Link>
               <Link href="/volumes">
-                <button className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold text-lg hover:bg-white/10 transition-all">
+                <button className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold text-lg hover:bg-white/10 transition-all active:scale-95">
                   Browse Articles
                 </button>
               </Link>
@@ -46,45 +47,6 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-
-      {/* 
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center p-6 rounded-xl bg-white border border-gray-200 hover:shadow-lg transition-shadow">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#083b7a] text-white mb-4">
-                <BookOpen className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Open Access</h3>
-              <p className="text-gray-600">Free access to all published research for global readership</p>
-            </div>
-
-            <div className="text-center p-6 rounded-xl bg-white border border-gray-200 hover:shadow-lg transition-shadow">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#083b7a] text-white mb-4">
-                <Award className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Peer Reviewed</h3>
-              <p className="text-gray-600">Rigorous peer review process ensuring quality research</p>
-            </div>
-
-            <div className="text-center p-6 rounded-xl bg-white border border-gray-200 hover:shadow-lg transition-shadow">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#083b7a] text-white mb-4">
-                <TrendingUp className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Fast Publication</h3>
-              <p className="text-gray-600">Quick turnaround from submission to publication</p>
-            </div>
-
-            <div className="text-center p-6 rounded-xl bg-white border border-gray-200 hover:shadow-lg transition-shadow">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#083b7a] text-white mb-4">
-                <Globe className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Global Reach</h3>
-              <p className="text-gray-600">Indexed in major databases for worldwide visibility</p>
-            </div>
-          </div>
-        </div>
-      </section> */}
 
       {/* Supported By Section */}
       <section className="py-16 bg-white">
@@ -96,11 +58,16 @@ const HomePage = () => {
             <div className="w-24 h-1 bg-[#083b7a] mx-auto rounded-full"></div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto border border-gray-100">
+          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto border border-gray-100 transform transition-all hover:scale-[1.01]">
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="flex-shrink-0">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#083b7a] to-[#0a4ea3] flex items-center justify-center text-white">
-                  <img src="https://crinfoglobal.com/Human.jpg" alt="" />
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#083b7a] to-[#0a4ea3] flex items-center justify-center text-white relative overflow-hidden">
+                  <Image
+                    src="https://crinfoglobal.com/Human.jpg"
+                    alt="Society of Human Centered Technology"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
               </div>
               <div className="flex-1 text-center md:text-left">
@@ -133,14 +100,15 @@ const HomePage = () => {
             <div className="w-24 h-1 bg-[#083b7a] mx-auto rounded-full"></div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto border border-gray-100">
+          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto border border-gray-100 transform transition-all hover:scale-[1.01]">
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="flex-shrink-0">
-                <div className="w-32 h-32 rounded-full  flex items-center justify-center text-white p-2">
-                  <img
+                <div className="w-32 h-32 rounded-full flex items-center justify-center text-white p-2 relative overflow-hidden">
+                  <Image
                     src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.jSQIqVHfK0h8av6QJKkK8gHaHZ%3Fpid%3DApi&f=1&ipt=cc721fe38adcaba38f02cf930974866482d6e6d7eb5e617fd1021ede545cd267&ipo=images"
                     alt="KL University Logo"
-                    className="w-full h-full object-contain rounded-full"
+                    fill
+                    className="object-contain p-2"
                   />
                 </div>
               </div>
@@ -185,11 +153,12 @@ const HomePage = () => {
           <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16">
             {/* Google Scholar */}
             <div className="flex flex-col items-center">
-              <div className="w-48 h-48 flex items-center justify-center bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                <img
+              <div className="w-48 h-48 relative bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-all hover:-translate-y-1">
+                <Image
                   src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Scholar_logo.svg"
                   alt="Google Scholar"
-                  className="w-full h-full object-contain"
+                  fill
+                  className="object-contain p-6"
                 />
               </div>
               <p className="mt-4 text-sm font-medium text-gray-700">
@@ -199,11 +168,12 @@ const HomePage = () => {
 
             {/* Crossref */}
             <div className="flex flex-col items-center">
-              <div className="w-48 h-48 flex items-center justify-center bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                <img
+              <div className="w-48 h-48 relative bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-all hover:-translate-y-1">
+                <Image
                   src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fipmuonline.com%2Fwp-content%2Fuploads%2F2021%2F04%2Fcrossref.jpg&f=1&nofb=1&ipt=bff95b089ed0e9da805bbc49f817bda609ddaaa868ba5e8424b8dbdd392978e8"
                   alt="Crossref"
-                  className="w-full h-full object-contain"
+                  fill
+                  className="object-contain p-6"
                 />
               </div>
               <p className="mt-4 text-sm font-medium text-gray-700">Crossref</p>

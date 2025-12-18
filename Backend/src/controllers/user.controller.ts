@@ -1,10 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-
+import prisma from "../utils/prisma.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/token.js";
 import { generateOTP } from "../services/email.service.js";
 import { queueOTPEmail } from "../services/emailQueue.service.js";
-const prisma = new PrismaClient();
 
 export const Signin = async (req: any, res: any) => {
   const { email, password } = req.body;
@@ -55,16 +53,16 @@ export const Signup = async (req: any, res: any) => {
   try {
     const salt = await bcrypt.genSalt(10);
     const encryptedPassword = await bcrypt.hash(password, salt);
-    
+
     // Generate OTP and set expiration (10 minutes from now)
     const otp = generateOTP();
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    
+
     const user = await prisma.user.create({
-      data: { 
-        email, 
-        password: encryptedPassword, 
-        userName, 
+      data: {
+        email,
+        password: encryptedPassword,
+        userName,
         role: 'RESEARCHER',
         emailVerified: false,
         otpCode: otp,
@@ -81,7 +79,7 @@ export const Signup = async (req: any, res: any) => {
       // Continue anyway - user can request resend if needed
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "User created successfully. Please check your email for verification code.",
       data: { id: user.id, email: user.email, userName: user.userName }
     });
@@ -180,7 +178,7 @@ export const GetUserById = async (req: any, res: any) => {
 
 export const VerifyOTP = async (req: any, res: any) => {
   const { email, otp } = req.body;
-  
+
   try {
     const user = await prisma.user.findUnique({
       where: { email },
@@ -228,7 +226,7 @@ export const VerifyOTP = async (req: any, res: any) => {
 
 export const ResendOTP = async (req: any, res: any) => {
   const { email } = req.body;
-  
+
   try {
     const user = await prisma.user.findUnique({
       where: { email },
@@ -272,9 +270,9 @@ export const ResendOTP = async (req: any, res: any) => {
 
 export const CheckAuth = async (req: any, res: any) => {
   try {
-    res.status(200).json({ 
-      message: "Success", 
-      data: req.user 
+    res.status(200).json({
+      message: "Success",
+      data: req.user
     });
   } catch (error: any) {
     console.log(`Error in checkAuth controller ${error.message}`);

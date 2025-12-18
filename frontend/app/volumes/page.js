@@ -1,24 +1,19 @@
-"use client";
-import React, { useEffect, useState } from 'react'
-import { listPublicVolumes } from '../../utils/api'
+import React from 'react'
+import { getPublicVolumes } from '../../utils/serverApi'
 import Link from 'next/link';
 
-const Page = () => {
-  const [volumes, setVolumes] = useState([])
-  const [loading, setLoading] = useState(true)
+export const metadata = {
+  title: "Volumes | Crinfo Global Publishers",
+  description: "Browse volumes and issues published by Crinfo Global Publishers.",
+};
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await listPublicVolumes()
-        setVolumes(data)
-      } catch (_) {
-        setVolumes([])
-      }
-      setLoading(false)
-    }
-    load()
-  }, [])
+const Page = async () => {
+  let volumes = [];
+  try {
+    volumes = await getPublicVolumes();
+  } catch (error) {
+    console.error("Error fetching volumes:", error);
+  }
 
   return (
     <div className='min-h-screen bg-white mt-16 py-8 px-5'>
@@ -28,12 +23,8 @@ const Page = () => {
           <div className='w-full h-px bg-gray-300'></div>
         </div>
 
-        {loading ? (
-          <div className='space-y-2'>
-            <div className='h-6 w-40 bg-gray-200 animate-pulse rounded' />
-            <div className='h-6 w-64 bg-gray-200 animate-pulse rounded' />
-            <div className='h-6 w-56 bg-gray-200 animate-pulse rounded' />
-          </div>
+        {volumes.length === 0 ? (
+          <div className='text-gray-600 italic'>No volumes available at the moment.</div>
         ) : (
           <div className='space-y-0'>
             {volumes.map((v, index) => (
@@ -44,7 +35,11 @@ const Page = () => {
                   </h2>
                   <div className='ml-6 space-y-1 mb-6'>
                     {(v.issues || []).map((issue) => (
-                      <Link key={issue.id} href={`/issue/${issue.id}`} className='block text-gray-800 hover:text-blue-600 cursor-pointer transition-colors duration-200'>
+                      <Link
+                        key={issue.id}
+                        href={`/issue/${issue.id}`}
+                        className='block text-gray-800 hover:text-blue-600 cursor-pointer transition-colors duration-200'
+                      >
                         Issue - {issue.number} | {issue.month} {issue.year}
                       </Link>
                     ))}

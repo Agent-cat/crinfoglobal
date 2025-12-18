@@ -1,219 +1,73 @@
-"use client";
-import React, { useEffect, useMemo, useState } from 'react'
-import { fetchArticle, requestDownload, downloadArticlePdf } from '../../../utils/api'
-import { useParams, useSearchParams } from 'next/navigation'
+import React from 'react'
+import { getArticle } from '../../../utils/serverApi'
 import Link from 'next/link'
+import ArticleContent from './ArticleContent'
 
-const ArticlePage = () => {
-  const params = useParams()
-  const search = useSearchParams()
-  const articleId = params.articleId
-  const [article, setArticle] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [showModal, setShowModal] = useState(false)
-  const tab = search.get('tab') || 'abstract'
+export async function generateMetadata({ params }) {
+  const { articleId } = await params;
+  try {
+    const article = await getArticle(articleId);
+    return {
+      title: `${article.title} | Crinfo Global Publishers`,
+      description: article.abstract?.substring(0, 160),
+    };
+  } catch (error) {
+    return { title: 'Article | Crinfo Global Publishers' };
+  }
+}
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await fetchArticle(articleId)
-        setArticle(data)
-      } finally {
-        setLoading(false)
-      }
-    }
-    if (articleId) load()
-  }, [articleId])
+const ArticlePage = async ({ params, searchParams }) => {
+  const { articleId } = await params;
+  const { tab = 'abstract' } = await searchParams;
 
-  const pagesText = useMemo(() => {
-    if (!article?.startPage || !article?.endPage) return null
-    return `Pages: ${article.startPage}-${article.endPage}`
-  }, [article])
+  let article = null;
+  try {
+    article = await getArticle(articleId);
+  } catch (error) {
+    console.error("Error fetching article:", error);
+  }
+
+  if (!article) {
+    return (
+      <div className='min-h-screen bg-white mt-16 py-8 px-5'>
+        <div className='max-w-3xl mx-auto text-black'>
+          <div>Article not found</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-white mt-16 py-8 px-5'>
-      <div className='max-w-3xl mx-auto text-black'>
-        {loading ? (
-          <div className='h-6 w-64 bg-gray-200 animate-pulse rounded' />
-        ) : article ? (
-          <>
-            <div className='text-sm text-gray-600'>
-              <Link href='/' className='text-blue-700 hover:underline'>Home</Link>
-              <span> / </span>
-              <Link href='/volumes' className='text-blue-700 hover:underline'>Volumes</Link>
-              <span> / Article</span>
-            </div>
-            <h1 className='text-2xl font-bold mt-2'>
-              {article.title}
-              <span className='ml-2 inline-block align-middle text-[11px] px-2 py-[2px] rounded bg-amber-100 text-amber-800'>Open Access</span>
-            </h1>
-            <div className='text-gray-700 mt-1'>{/* authors if stored structured in authorsJson */}</div>
-            <div className='flex items-center gap-3 mt-2'>
-              {typeof article.views === 'number' && <div className='text-sm text-gray-600'>{article.views}</div>}
-              {pagesText && <div className='text-sm text-gray-600'>{pagesText}</div>}
-            </div>
-            <div className='mt-4 flex gap-2'>
-              {article.pdfPath && (
-                <>
-                  <button className='px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700' onClick={async ()=>{
-                    try {
-                      const res = await downloadArticlePdf(article.id);
-                      const blobUrl = window.URL.createObjectURL(res.data);
-                      const a = document.createElement('a');
-                      a.href = blobUrl;
-                      a.download = 'article.pdf';
-                      a.click();
-                      window.URL.revokeObjectURL(blobUrl);
-                    } catch (err) {
-                      // Not approved; show modal to request access
-                      setShowModal(true);
-                    }
-                  }}>
-                    Download PDF
-                  </button>
-                </>
-              )}
-              <Link className={`px-3 py-1 rounded ${tab==='cite' ? 'bg-[#083b7a] text-white' : 'bg-gray-100 hover:bg-gray-200'}`} href={`?tab=cite`}>Cite this article</Link>
-              <Link className={`px-3 py-1 rounded ${tab==='abstract' ? 'bg-[#083b7a] text-white' : 'bg-gray-100 hover:bg-gray-200'}`} href={`?tab=abstract`}>Abstract</Link>
-            </div>
+      <div className='max-w-3xl mx-auto text-black text-justify'>
+        <div className='text-sm text-gray-600'>
+          <Link href='/' className='text-blue-700 hover:underline'>Home</Link>
+          <span> / </span>
+          <Link href='/volumes' className='text-blue-700 hover:underline'>Volumes</Link>
+          <span> / Article</span>
+        </div>
 
-            {tab === 'cite' ? (
-              <div className='mt-6'>
-                <h2 className='text-lg font-semibold mb-2'>Cite this article</h2>
-                <div className='border rounded p-4 bg-gray-50'>
-                  <div className='text-sm text-gray-800 whitespace-pre-wrap mb-4'>
-                    <div className='mb-3'>
-                      <strong className='text-gray-900'>Title:</strong>
-                      <div className='mt-1'>{article.title}</div>
-                    </div>
-                    
-                    {article.authorsJson && (() => {
-                      const authors = typeof article.authorsJson === 'string' 
-                        ? JSON.parse(article.authorsJson) 
-                        : article.authorsJson;
-                      return (
-                        <div className='mb-3'>
-                          <strong className='text-gray-900'>Authors:</strong>
-                          <div className='mt-1'>
-                            {authors.map((author, idx, arr) => (
-                              <span key={idx}>
-                                {author.name}
-                                {author.superscript && <sup>{author.superscript}</sup>}
-                                {idx < arr.length - 1 ? ', ' : ''}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                    
-                    {article.abstract && (
-                      <div className='mb-3'>
-                        <strong className='text-gray-900'>Abstract:</strong>
-                        <div className='mt-1'>{article.abstract}</div>
-                      </div>
-                    )}
-                    
-                    {article.volumeNumber && (
-                      <div className='mb-3'>
-                        <strong className='text-gray-900'>Volume:</strong> {article.volumeNumber}
-                      </div>
-                    )}
-                    
-                    {article.issueNumber && (
-                      <div className='mb-3'>
-                        <strong className='text-gray-900'>Issue:</strong> {article.issueNumber}
-                      </div>
-                    )}
-                    
-                    {(article.startPage && article.endPage) && (
-                      <div className='mb-3'>
-                        <strong className='text-gray-900'>Pages:</strong> {article.startPage}-{article.endPage}
-                      </div>
-                    )}
-                    
-                    {article.doi && (
-                      <div className='mb-3'>
-                        <strong className='text-gray-900'>DOI:</strong> {article.doi}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <button 
-                    className='px-4 py-2 rounded bg-[#083b7a] text-white hover:bg-[#0a4ea3] transition-colors text-sm font-medium'
-                    onClick={(e) => {
-                      // Store button reference before async operation
-                      const btn = e.currentTarget;
-                      const originalText = btn.textContent;
-                      
-                      const authorsData = article.authorsJson 
-                        ? (typeof article.authorsJson === 'string' ? JSON.parse(article.authorsJson) : article.authorsJson)
-                        : [];
-                      const authors = authorsData.map(a => a.name + (a.superscript ? `^${a.superscript}` : '')).join(', ');
-                      const citation = `Title: ${article.title}\n\n` +
-                        (authors ? `Authors: ${authors}\n\n` : '') +
-                        (article.abstract ? `Abstract: ${article.abstract}\n\n` : '') +
-                        (article.volumeNumber ? `Volume: ${article.volumeNumber}\n` : '') +
-                        (article.issueNumber ? `Issue: ${article.issueNumber}\n` : '') +
-                        (article.startPage && article.endPage ? `Pages: ${article.startPage}-${article.endPage}\n` : '') +
-                        (article.doi ? `DOI: ${article.doi}` : '');
-                      
-                      navigator.clipboard.writeText(citation).then(() => {
-                        // Show success feedback
-                        btn.textContent = 'Copied!';
-                        btn.classList.add('bg-green-600');
-                        btn.classList.remove('bg-[#083b7a]', 'hover:bg-[#0a4ea3]');
-                        setTimeout(() => {
-                          btn.textContent = originalText;
-                          btn.classList.remove('bg-green-600');
-                          btn.classList.add('bg-[#083b7a]', 'hover:bg-[#0a4ea3]');
-                        }, 2000);
-                      }).catch(err => {
-                        console.error('Copy failed:', err);
-                        btn.textContent = 'Copy Failed';
-                        setTimeout(() => {
-                          btn.textContent = originalText;
-                        }, 2000);
-                      });
-                    }}
-                  >
-                    Copy Citation
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className='mt-6'>
-                <h2 className='text-lg font-semibold mb-2'>Abstract</h2>
-                <p className='text-gray-800 leading-7 whitespace-pre-wrap border rounded p-4 bg-gray-50'>{article.abstract}</p>
-                {article.keywords && (
-                  <div className='mt-4'>
-                    <div className='text-sm font-semibold'>Keywords</div>
-                    <div className='text-sm text-gray-700'>{article.keywords}</div>
-                  </div>
-                )}
-              </div>
-            )}
+        <h1 className='text-2xl font-bold mt-2 leading-tight'>
+          {article.title}
+          <span className='ml-2 inline-block align-middle text-[11px] px-2 py-[2px] rounded bg-amber-100 text-amber-800 whitespace-nowrap'>Open Access</span>
+        </h1>
 
-            {/* Access Modal */}
-            {showModal && (
-              <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40'>
-                <div className='bg-white rounded-lg shadow-xl p-6 max-w-sm w-full'>
-                  <h3 className='text-lg font-semibold mb-2'>Request access</h3>
-                  <p className='text-sm text-gray-700 mb-4'>You need editor approval to download this PDF. Send a request?</p>
-                  <div className='flex justify-end gap-2'>
-                    <button className='px-4 py-2 rounded-lg border border-gray-300' onClick={()=>setShowModal(false)}>Cancel</button>
-                    <button className='px-4 py-2 rounded-lg bg-[#083b7a] text-white hover:bg-[#0a4ea3]' onClick={async ()=>{
-                      try { await requestDownload(article.id); } catch {}
-                      setShowModal(false);
-                    }}>Request</button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <div>Article not found</div>
-        )}
+        <div className='flex flex-wrap items-center gap-3 mt-4 mb-6 border-b pb-4'>
+          {typeof article.views === 'number' && (
+            <div className='text-sm text-gray-600 flex items-center gap-1'>
+              <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 12a3 3 0 11-6 0 3 3 0 016 0z' />
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' />
+              </svg>
+              {article.views} views
+            </div>
+          )}
+          {article.startPage && article.endPage && (
+            <div className='text-sm text-gray-600'>Pages: {article.startPage}-{article.endPage}</div>
+          )}
+        </div>
+
+        <ArticleContent article={article} initialTab={tab} />
       </div>
     </div>
   )

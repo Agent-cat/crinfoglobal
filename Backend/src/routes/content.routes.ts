@@ -1,5 +1,5 @@
 import express, { type Request } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../utils/prisma.js';
 import { Protected } from '../middlewares/auth.middleware.js';
 import { RequireEditor } from '../middlewares/auth.middleware.js';
 import multer from 'multer';
@@ -14,7 +14,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 // Volumes
@@ -102,10 +101,10 @@ router.post('/articles', Protected, upload.fields([
     if (!title || !articleType || !abstract) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
-    
+
     // Handle multiple file uploads
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    
+
     // compute pages if a PDF was uploaded (best-effort heuristic)
     let pdfPublicPath: string | null = null;
     let totalPages: number | null = null;
@@ -122,19 +121,19 @@ router.post('/articles', Protected, upload.fields([
         // ignore page count errors, leave null
       }
     }
-    
+
     // Handle attachments (ZIP file)
     let attachmentsPath: string | null = null;
     if (files?.attachments?.[0]?.path) {
       attachmentsPath = `/api/content/public/articles/attachments/${path.basename(files.attachments[0].path)}`;
     }
-    
+
     // Handle script file
     let scriptPath: string | null = null;
     if (files?.script?.[0]?.path) {
       scriptPath = `/api/content/public/articles/scripts/${path.basename(files.script[0].path)}`;
     }
-    
+
     const article = await prisma.article.create({
       data: {
         title,
@@ -165,7 +164,7 @@ router.post('/articles', Protected, upload.fields([
       });
 
       const editorEmails = editors.map(editor => editor.email);
-      
+
       if (editorEmails.length > 0) {
         console.log(`Found ${editorEmails.length} verified editor(s) in database`);
       } else {
@@ -269,11 +268,11 @@ router.post('/articles/create-publish', Protected, RequireEditor, upload.fields(
 
     // Handle multiple file uploads
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    
+
     // Handle PDF file upload
     let pdfPublicPath: string | null = null;
     let totalPages: number | null = null;
-    
+
     if (files?.file?.[0]?.path) {
       pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(files.file[0].path)}`;
       try {
@@ -287,7 +286,7 @@ router.post('/articles/create-publish', Protected, RequireEditor, upload.fields(
         // ignore page count errors, leave null
       }
     }
-    
+
     // Handle script file
     let scriptPath: string | null = null;
     if (files?.script?.[0]?.path) {
@@ -322,12 +321,12 @@ router.post('/articles/create-publish', Protected, RequireEditor, upload.fields(
 
 // Fetch for admin panel
 router.get('/volumes', Protected, RequireEditor, async (_req: any, res: any) => {
-  const volumes = await prisma.volume.findMany({ 
-    include: { 
-      issues: { 
-        orderBy: { createdAt: 'asc' } 
-      } 
-    } 
+  const volumes = await prisma.volume.findMany({
+    include: {
+      issues: {
+        orderBy: { createdAt: 'asc' }
+      }
+    }
   });
   res.json({ data: volumes });
 });
@@ -335,10 +334,10 @@ router.get('/volumes', Protected, RequireEditor, async (_req: any, res: any) => 
 // Public fetch volumes with issues (no articles) for site display
 router.get('/public/volumes', async (_req: any, res: any) => {
   const volumes = await prisma.volume.findMany({
-    include: { 
-      issues: { 
-        orderBy: { createdAt: 'asc' } 
-      } 
+    include: {
+      issues: {
+        orderBy: { createdAt: 'asc' }
+      }
     },
     orderBy: { number: 'desc' },
   });
@@ -377,7 +376,7 @@ router.post('/articles/:articleId/request-download', Protected, async (req: any,
   const { articleId } = req.params;
   const userId = req.user.id;
   try {
-    const existing = await prisma.downloadRequest.findFirst({ where: { articleId, userId, status: { in: ['PENDING','APPROVED'] } } });
+    const existing = await prisma.downloadRequest.findFirst({ where: { articleId, userId, status: { in: ['PENDING', 'APPROVED'] } } });
     if (existing) return res.json({ message: 'Already requested', data: existing });
     const created = await prisma.downloadRequest.create({ data: { articleId, userId } });
     res.status(201).json({ message: 'Request created', data: created });
@@ -397,9 +396,9 @@ router.post('/download-requests/:id/deny', Protected, RequireEditor, async (req:
 });
 
 router.get('/download-requests', Protected, RequireEditor, async (_req: any, res: any) => {
-  const list = await prisma.downloadRequest.findMany({ 
+  const list = await prisma.downloadRequest.findMany({
     orderBy: { createdAt: 'desc' },
-    include: { 
+    include: {
       article: { include: { issue: { include: { volume: true } } } },
       user: true,
     },
@@ -430,7 +429,7 @@ router.get('/articles', Protected, RequireEditor, async (_req: any, res: any) =>
 
 // Editor: get published articles
 router.get('/articles/published', Protected, RequireEditor, async (_req: any, res: any) => {
-  const articles = await prisma.article.findMany({ 
+  const articles = await prisma.article.findMany({
     where: { status: 'PUBLISHED' },
     include: { issue: { include: { volume: true } } }
   });

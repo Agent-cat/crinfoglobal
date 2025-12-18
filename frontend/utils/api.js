@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://10.123.22.158:8000/api/auth";
-const CONTENT_URL = "http://10.123.22.158:8000/api/content";
+const API_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || "http://localhost:8000/api/auth";
+const CONTENT_URL = process.env.NEXT_PUBLIC_CONTENT_API_URL || "http://localhost:8000/api/content";
 
 
 const getToken = () => {
@@ -86,7 +86,7 @@ export const checkAuth = async () => {
   if (!token) {
     throw new Error('No token found');
   }
-  
+
   const response = await api.get(`/check`);
   return response.data.data;
 };
