@@ -19,9 +19,9 @@ const transporter = nodemailer.createTransport({
   tls: {
     rejectUnauthorized: false
   },
-  connectionTimeout: 10000, // 10 seconds (reduced for faster fallback)
-  greetingTimeout: 10000, // 10 seconds
-  socketTimeout: 10000, // 10 seconds
+  connectionTimeout: 30000, // 30 seconds
+  greetingTimeout: 30000, // 30 seconds
+  socketTimeout: 30000, // 30 seconds
   pool: true, // Use connection pooling
   maxConnections: 5,
   maxMessages: 10,
@@ -64,7 +64,7 @@ const sendEmailWithFallback = async (mailOptions: any) => {
 
   // Check if we're in development mode
   const isDevelopment = (process.env.NODE_ENV !== 'production') || FORCE_DEV_MODE;
-  
+
   // Log email configuration for debugging
   console.log('=== EMAIL CONFIGURATION ===');
   console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -75,7 +75,7 @@ const sendEmailWithFallback = async (mailOptions: any) => {
   console.log('Subject:', mailOptions.subject);
   console.log('Attachments:', mailOptions.attachments?.length || 0);
   console.log('=== END CONFIGURATION ===');
-  
+
   // In development, use console logging instead of sending emails
   if (isDevelopment) {
     console.log('=== DEVELOPMENT MODE: Email would be sent ===');
@@ -114,7 +114,7 @@ const sendEmailWithFallback = async (mailOptions: any) => {
     console.error('Primary transporter failed:', primaryError.message);
     console.error('Error code:', primaryError.code);
     console.error('Error command:', primaryError.command);
-    
+
     // Try fallback transporter
     try {
       console.log('Attempting to send email with fallback transporter (port 465, SSL)...');
@@ -126,10 +126,10 @@ const sendEmailWithFallback = async (mailOptions: any) => {
       console.error('Fallback transporter also failed:', fallbackError.message);
       console.error('Error code:', fallbackError.code);
       console.error('Error command:', fallbackError.command);
-      
+
       // Provide helpful error message based on error type
       let errorMessage = `Both email transporters failed. Primary: ${primaryError.message}, Fallback: ${fallbackError.message}`;
-      
+
       if (primaryError.code === 'ETIMEDOUT' || fallbackError.code === 'ETIMEDOUT') {
         errorMessage += '\n\nTroubleshooting:\n' +
           '1. Check if EMAIL_USER and EMAIL_PASS are set correctly in .env\n' +
@@ -138,7 +138,7 @@ const sendEmailWithFallback = async (mailOptions: any) => {
           '4. Verify 2-Factor Authentication is enabled on your Gmail account\n' +
           '5. Try generating a new App Password at: https://myaccount.google.com/apppasswords';
       }
-      
+
       throw new Error(errorMessage);
     }
   }
@@ -182,7 +182,7 @@ export const sendOTPEmail = async (email: string, otp: string) => {
     } catch (error: any) {
       lastError = error;
       console.error(`Email send attempt ${attempt} failed:`, error.message);
-      
+
       if (attempt < maxRetries) {
         const delay = attempt * 2000; // Exponential backoff: 2s, 4s, 6s
         console.log(`Retrying in ${delay}ms...`);
@@ -192,12 +192,12 @@ export const sendOTPEmail = async (email: string, otp: string) => {
   }
 
   console.error('All email send attempts failed:', lastError);
-  
+
   // Fallback: Log the OTP to console for development/testing
   console.log('=== EMAIL FALLBACK - OTP FOR DEVELOPMENT ===');
   console.log(`OTP for ${email}: ${otp}`);
   console.log('=== END FALLBACK ===');
-  
+
   return false;
 };
 
@@ -214,7 +214,7 @@ export const sendEditorNotificationEmail = async (articleData: any, pdfPath?: st
       // pdfPath format: /api/content/public/articles/pdf/filename.pdf
       const filename = path.basename(pdfPath);
       const actualPath = path.join(process.cwd(), 'uploads', 'articles', filename);
-      
+
       if (fs.existsSync(actualPath)) {
         attachments.push({
           filename: filename,
@@ -272,9 +272,9 @@ export const sendEditorNotificationEmail = async (articleData: any, pdfPath?: st
         <div style="background-color: #f0f8f0; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <h4 style="color: #083b7a; margin-top: 0;">Authors:</h4>
           <ul style="margin-bottom: 0;">
-            ${articleData.authorsJson.map((author: any) => 
-              `<li>${author.name} (${author.email})${author.affiliation ? ` - ${author.affiliation}` : ''}</li>`
-            ).join('')}
+            ${articleData.authorsJson.map((author: any) =>
+      `<li>${author.name} (${author.email})${author.affiliation ? ` - ${author.affiliation}` : ''}</li>`
+    ).join('')}
           </ul>
         </div>
         ` : ''}
@@ -316,7 +316,7 @@ export const sendEditorNotificationEmail = async (articleData: any, pdfPath?: st
     } catch (error: any) {
       lastError = error;
       console.error(`Editor notification email send attempt ${attempt} failed:`, error.message);
-      
+
       if (attempt < maxRetries) {
         const delay = attempt * 2000; // Exponential backoff: 2s, 4s, 6s
         console.log(`Retrying in ${delay}ms...`);
@@ -388,7 +388,7 @@ export const sendUserSubmissionConfirmationEmail = async (userEmail: string, art
     } catch (error: any) {
       lastError = error;
       console.error(`User confirmation email send attempt ${attempt} failed:`, error.message);
-      
+
       if (attempt < maxRetries) {
         const delay = attempt * 2000; // Exponential backoff: 2s, 4s, 6s
         console.log(`Retrying in ${delay}ms...`);
@@ -398,6 +398,62 @@ export const sendUserSubmissionConfirmationEmail = async (userEmail: string, art
   }
 
   console.error('All user confirmation email send attempts failed:', lastError);
+  return false;
+};
+
+export const sendPasswordResetEmail = async (email: string, resetToken: string) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Password Reset - CrinfoGlobal Publishers',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #083b7a;">Password Reset Request</h2>
+        <p>You requested a password reset for your CrinfoGlobal Publishers account.</p>
+        <p>Please click the button below to reset your password. This link will expire in 1 hour.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" 
+             style="background-color: #083b7a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+            Reset Password
+          </a>
+        </div>
+        <p>If the button doesn't work, you can copy and paste the following link into your browser:</p>
+        <p style="word-break: break-all; color: #083b7a;">${resetLink}</p>
+        <p>If you didn't request this reset, please ignore this email and your password will remain unchanged.</p>
+        <hr style="margin: 30px 0;">
+        <p style="color: #666; font-size: 12px;">
+          CrinfoGlobal Publishers<br>
+          Kattur 641667 Pongalur SO TAMIL NADU 641667<br>
+          Contact: 9063500171 | info@crinfoglobal.com
+        </p>
+      </div>
+    `,
+  };
+
+  const maxRetries = process.env.NODE_ENV === 'production' ? 3 : 1;
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Attempting to send password reset email (attempt ${attempt}/${maxRetries})`);
+      await sendEmailWithFallback(mailOptions);
+      console.log('Password reset email sent successfully');
+      return true;
+    } catch (error: any) {
+      lastError = error;
+      console.error(`Email send attempt ${attempt} failed:`, error.message);
+
+      if (attempt < maxRetries) {
+        const delay = attempt * 2000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  console.error('All email send attempts failed:', lastError);
   return false;
 };
 
@@ -441,7 +497,7 @@ export const sendEditorNotificationEmailDirect = async (articleData: any, pdfPat
     try {
       const filename = path.basename(pdfPath);
       const actualPath = path.join(process.cwd(), 'uploads', 'articles', filename);
-      
+
       if (fs.existsSync(actualPath)) {
         attachments.push({
           filename: filename,
@@ -533,6 +589,41 @@ export const sendUserSubmissionConfirmationEmailDirect = async (userEmail: strin
         <hr style="margin: 30px 0;">
         <p style="color: #666; font-size: 12px;">
           CrinfoGlobal Publishers<br>
+          Contact: 9063500171 | info@crinfoglobal.com
+        </p>
+      </div>
+    `,
+  };
+
+  await sendEmailWithFallback(mailOptions);
+};
+
+export const sendPasswordResetEmailDirect = async (email: string, resetToken: string) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Password Reset - CrinfoGlobal Publishers',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #083b7a;">Password Reset Request</h2>
+        <p>You requested a password reset for your CrinfoGlobal Publishers account.</p>
+        <p>Please click the button below to reset your password. This link will expire in 1 hour.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" 
+             style="background-color: #083b7a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+            Reset Password
+          </a>
+        </div>
+        <p>If the button doesn't work, you can copy and paste the following link into your browser:</p>
+        <p style="word-break: break-all; color: #083b7a;">${resetLink}</p>
+        <p>If you didn't request this reset, please ignore this email and your password will remain unchanged.</p>
+        <hr style="margin: 30px 0;">
+        <p style="color: #666; font-size: 12px;">
+          CrinfoGlobal Publishers<br>
+          Kattur 641667 Pongalur SO TAMIL NADU 641667<br>
           Contact: 9063500171 | info@crinfoglobal.com
         </p>
       </div>

@@ -7,7 +7,7 @@ const page = () => {
   const lightBlue = '#e6f0ff'
 
   return (
-    <div className='min-h-screen mt-16 text-black bg-white py-8 px-6'>
+    <div className='min-h-screen mt-16 text-justify text-black bg-white py-8 px-6'>
       <div className="max-w-4xl mx-auto">
         <header style={{ marginBottom: 32, borderBottom: `3px solid ${primaryBlue}`, paddingBottom: 16 }}>
           <h1 style={{ color: darkBlue, fontSize: 36, margin: 0, fontWeight: 'bold' }}>Journal Overview</h1>
@@ -18,12 +18,12 @@ const page = () => {
         <section style={{ background: lightBlue, padding: 24, borderRadius: 12, border: `1px solid ${primaryBlue}`, marginBottom: 32 }}>
           <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Aims & Scope</h2>
           <p style={{ marginBottom: 16, fontSize: 16 }}>
-            "Frontiers in Engineering and Informatics" is a leading peer-reviewed journal that publishes original research, 
-            state-of-the-art reviews, and technical notes. The journal serves as a platform for scholars, practitioners, 
+            "Frontiers in Engineering and Informatics" is a leading peer-reviewed journal that publishes original research,
+            state-of-the-art reviews, and technical notes. The journal serves as a platform for scholars, practitioners,
             and professionals to share innovative research that advances the fields of engineering and informatics.
           </p>
           <p style={{ marginBottom: 16, fontSize: 16 }}>
-            The journal welcomes contributions that address theoretical developments, practical applications, and emerging 
+            The journal welcomes contributions that address theoretical developments, practical applications, and emerging
             challenges across interdisciplinary domains. Areas of focus include, but are not limited to:
           </p>
           <ul style={{ paddingLeft: 24, marginBottom: 16 }}>
@@ -38,7 +38,7 @@ const page = () => {
             <li style={{ marginBottom: 8 }}>Visualization and Multimedia Systems</li>
           </ul>
           <p style={{ fontSize: 16 }}>
-            Submissions that emphasize the societal impact of research and its implications for industrial applications 
+            Submissions that emphasize the societal impact of research and its implications for industrial applications
             are highly encouraged.
           </p>
         </section>
@@ -66,7 +66,7 @@ const page = () => {
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Indexing and Abstracting</h2>
           <p style={{ marginBottom: 16 }}>
-            "Frontiers in Engineering and Informatics" is indexed in prestigious databases to enhance visibility 
+            "Frontiers in Engineering and Informatics" is indexed in prestigious databases to enhance visibility
             and ensure accessibility for researchers worldwide. Indexing partners include: <strong>YET TO BE UPDATED!</strong>
           </p>
         </section>
@@ -74,8 +74,8 @@ const page = () => {
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Open Access Policy</h2>
           <p style={{ marginBottom: 16 }}>
-            All articles published in "Frontiers in Engineering and Informatics" are freely accessible under the 
-            terms of the Creative Commons Attribution License (CC-BY 4.0). This ensures unrestricted use, 
+            All articles published in "Frontiers in Engineering and Informatics" are freely accessible under the
+            terms of the Creative Commons Attribution License (CC-BY 4.0). This ensures unrestricted use,
             distribution, and reproduction in any medium, provided the original work is properly cited.
           </p>
         </section>
@@ -83,7 +83,7 @@ const page = () => {
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Archiving</h2>
           <p style={{ marginBottom: 16 }}>
-            All published articles are digitally preserved in Portico, ensuring long-term accessibility and 
+            All published articles are digitally preserved in Portico, ensuring long-term accessibility and
             reliability for future generations.
           </p>
         </section>
@@ -91,7 +91,7 @@ const page = () => {
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Ethics and Integrity</h2>
           <p style={{ marginBottom: 16 }}>
-            The journal adheres to the highest standards of ethical publishing. We follow COPE's Core Practices 
+            The journal adheres to the highest standards of ethical publishing. We follow COPE's Core Practices
             to ensure transparency, fairness, and integrity in all aspects of the publication process.
           </p>
           <p style={{ marginBottom: 12, fontWeight: 600 }}>Key ethical practices include:</p>

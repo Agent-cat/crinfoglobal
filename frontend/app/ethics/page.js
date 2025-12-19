@@ -7,7 +7,7 @@ const page = () => {
   const lightBlue = '#e6f0ff'
 
   return (
-    <div className='min-h-screen text-black pt-16 bg-white py-8 px-6'>
+    <div className='min-h-screen text-justify text-black pt-16 bg-white py-8 px-6'>
       <div className="max-w-4xl mx-auto">
         <header style={{ marginBottom: 32, borderBottom: `3px solid ${primaryBlue}`, paddingBottom: 16 }}>
           <h1 style={{ color: darkBlue, fontSize: 36, margin: 0, fontWeight: 'bold' }}>Publication Ethics</h1>
@@ -18,8 +18,8 @@ const page = () => {
         <section style={{ background: lightBlue, padding: 24, borderRadius: 12, border: `1px solid ${primaryBlue}`, marginBottom: 32 }}>
           <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Our Commitment</h2>
           <p style={{ marginBottom: 16, fontSize: 16 }}>
-            "Frontiers in Engineering and Informatics" is committed to maintaining the highest standards of 
-            publication ethics and integrity. We adhere to the guidelines established by the Committee on 
+            "Frontiers in Engineering and Informatics" is committed to maintaining the highest standards of
+            publication ethics and integrity. We adhere to the guidelines established by the Committee on
             Publication Ethics (COPE) and follow best practices in scholarly publishing.
           </p>
         </section>
@@ -84,8 +84,8 @@ const page = () => {
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Conflict of Interest</h2>
           <p style={{ marginBottom: 16, fontSize: 16 }}>
-            All parties involved in the publication process must disclose any potential conflicts of interest. 
-            This includes financial, personal, professional, or other relationships that could influence 
+            All parties involved in the publication process must disclose any potential conflicts of interest.
+            This includes financial, personal, professional, or other relationships that could influence
             the objectivity of the work.
           </p>
           <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
@@ -103,7 +103,7 @@ const page = () => {
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Handling Ethical Violations</h2>
           <p style={{ marginBottom: 16, fontSize: 16 }}>
-            When ethical violations are suspected or reported, we follow a systematic approach to investigate 
+            When ethical violations are suspected or reported, we follow a systematic approach to investigate
             and resolve the matter fairly and transparently.
           </p>
           <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
@@ -138,8 +138,8 @@ const page = () => {
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Research Integrity</h2>
           <p style={{ marginBottom: 16, fontSize: 16 }}>
-            We are committed to promoting research integrity and responsible conduct of research. 
-            This includes adherence to ethical guidelines, proper data management, and transparent 
+            We are committed to promoting research integrity and responsible conduct of research.
+            This includes adherence to ethical guidelines, proper data management, and transparent
             reporting of research findings.
           </p>
           <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
@@ -158,8 +158,8 @@ const page = () => {
         <section style={{ background: '#f0f9ff', padding: 24, borderRadius: 12, border: `1px solid ${primaryBlue}/30` }}>
           <h2 style={{ color: darkBlue, fontSize: 24, marginTop: 0, marginBottom: 16 }}>Reporting Ethical Concerns</h2>
           <p style={{ marginBottom: 16, fontSize: 16 }}>
-            If you suspect any ethical violations or have concerns about the integrity of published work, 
-            please report them to our ethics committee. All reports will be treated confidentially and 
+            If you suspect any ethical violations or have concerns about the integrity of published work,
+            please report them to our ethics committee. All reports will be treated confidentially and
             investigated thoroughly.
           </p>
           <p style={{ fontSize: 16, fontWeight: 600, color: darkBlue }}>

@@ -14,6 +14,6 @@ export const useVolumes = () => {
       }
       return data;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes - volumes don't change often
+    staleTime: 0,
   });
 };

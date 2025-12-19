@@ -10,6 +10,8 @@ import {
   CheckAuth,
   VerifyOTP,
   ResendOTP,
+  ForgotPassword,
+  ResetPassword,
 } from "../controllers/user.controller.js";
 import { Protected } from "../middlewares/auth.middleware.js";
 
@@ -21,6 +23,8 @@ router.post("/signin", Signin);
 router.post("/logout", Logout);
 router.post("/verify-otp", VerifyOTP);
 router.post("/resend-otp", ResendOTP);
+router.post("/forgot-password", ForgotPassword);
+router.post("/reset-password", ResetPassword);
 router.post("/:id", GetUserById);
 router.delete("/delete/:id", DeleteUser);
 router.put("/update/:id", Protected, UpdateUser);

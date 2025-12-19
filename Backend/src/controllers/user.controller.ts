@@ -2,7 +2,8 @@ import prisma from "../utils/prisma.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/token.js";
 import { generateOTP } from "../services/email.service.js";
-import { queueOTPEmail } from "../services/emailQueue.service.js";
+import crypto from "crypto";
+import { queueOTPEmail, queuePasswordReset } from "../services/emailQueue.service.js";
 
 export const Signin = async (req: any, res: any) => {
   const { email, password } = req.body;
@@ -38,19 +39,28 @@ export const Signin = async (req: any, res: any) => {
 export const Signup = async (req: any, res: any) => {
   const { email, userName, password } = req.body;
 
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      email: email,
-    },
-  });
-
-  if (existingUser) {
-    return res
-      .status(400)
-      .json({ message: "User with this email already exists" });
-  }
-
   try {
+    // Check if user already exists in main table
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (existingUser) {
+      if (existingUser.emailVerified) {
+        return res
+          .status(400)
+          .json({ message: "User with this email already exists" });
+      } else {
+        // User exists but is unverified (likely from legacy flow)
+        // Delete from User table so we can use the strict PendingUser flow
+        await prisma.user.delete({
+          where: { email: email },
+        });
+      }
+    }
+
     const salt = await bcrypt.genSalt(10);
     const encryptedPassword = await bcrypt.hash(password, salt);
 
@@ -58,15 +68,22 @@ export const Signup = async (req: any, res: any) => {
     const otp = generateOTP();
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: encryptedPassword,
+    // Store in PendingUser table instead of User table
+    await prisma.pendingUser.upsert({
+      where: { email },
+      update: {
         userName,
-        role: 'RESEARCHER',
-        emailVerified: false,
+        password: encryptedPassword,
         otpCode: otp,
-        otpExpiresAt: otpExpiresAt
+        otpExpiresAt: otpExpiresAt,
+        createdAt: new Date(),
+      },
+      create: {
+        email,
+        userName,
+        password: encryptedPassword,
+        otpCode: otp,
+        otpExpiresAt: otpExpiresAt,
       },
     });
 
@@ -80,8 +97,8 @@ export const Signup = async (req: any, res: any) => {
     }
 
     res.status(200).json({
-      message: "User created successfully. Please check your email for verification code.",
-      data: { id: user.id, email: user.email, userName: user.userName }
+      message: "Verification code sent to your email. Please verify to complete registration.",
+      data: { email: email }
     });
   } catch (error) {
     res.status(500).json({ message: `Failed ${error} ` });
@@ -180,6 +197,45 @@ export const VerifyOTP = async (req: any, res: any) => {
   const { email, otp } = req.body;
 
   try {
+    // 1. Check PendingUser first (New Flow)
+    const pendingUser = await prisma.pendingUser.findUnique({
+      where: { email },
+    });
+
+    if (pendingUser) {
+      if (new Date() > pendingUser.otpExpiresAt) {
+        return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+      }
+
+      if (pendingUser.otpCode !== otp) {
+        return res.status(400).json({ message: "Invalid OTP" });
+      }
+
+      // Create new user from pending data
+      const newUser = await prisma.user.create({
+        data: {
+          email: pendingUser.email,
+          userName: pendingUser.userName,
+          password: pendingUser.password,
+          role: 'RESEARCHER',
+          emailVerified: true,
+        },
+      });
+
+      // Delete pending user record
+      await prisma.pendingUser.delete({
+        where: { id: pendingUser.id },
+      });
+
+      const token = generateToken(newUser.id, res);
+      return res.status(200).json({
+        message: "Email verified and account created successfully",
+        data: { id: newUser.id, email: newUser.email, userName: newUser.userName, role: newUser.role },
+        token: token,
+      });
+    }
+
+    // 2. Check existing User (Legacy Flow for already created but unverified users)
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -228,6 +284,32 @@ export const ResendOTP = async (req: any, res: any) => {
   const { email } = req.body;
 
   try {
+    // Generate new OTP
+    const otp = generateOTP();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // 1. Check PendingUser
+    const pendingUser = await prisma.pendingUser.findUnique({
+      where: { email },
+    });
+
+    if (pendingUser) {
+      await prisma.pendingUser.update({
+        where: { id: pendingUser.id },
+        data: {
+          otpCode: otp,
+          otpExpiresAt: otpExpiresAt,
+        },
+      });
+      // Send email
+      try {
+        queueOTPEmail(email, otp);
+      } catch (e) { console.error(e); }
+
+      return res.status(200).json({ message: "OTP sent successfully" });
+    }
+
+    // 2. Check existing User
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -239,10 +321,6 @@ export const ResendOTP = async (req: any, res: any) => {
     if (user.emailVerified) {
       return res.status(400).json({ message: "Email already verified" });
     }
-
-    // Generate new OTP
-    const otp = generateOTP();
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Update user with new OTP
     await prisma.user.update({
@@ -277,5 +355,70 @@ export const CheckAuth = async (req: any, res: any) => {
   } catch (error: any) {
     console.log(`Error in checkAuth controller ${error.message}`);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const ForgotPassword = async (req: any, res: any) => {
+  const { email } = req.body;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      // For security, don't reveal if user exists
+      return res.status(200).json({ message: "If an account with that email exists, we have sent a password reset link." });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetToken,
+        resetTokenExpires,
+      },
+    });
+
+    queuePasswordReset(email, resetToken);
+
+    res.status(200).json({ message: "If an account with that email exists, we have sent a password reset link." });
+  } catch (error) {
+    res.status(500).json({ message: `Failed ${error}` });
+  }
+};
+
+export const ResetPassword = async (req: any, res: any) => {
+  const { token, password } = req.body;
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpires: {
+          gt: new Date(),
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const encryptedPassword = await bcrypt.hash(password, salt);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: encryptedPassword,
+        resetToken: null,
+        resetTokenExpires: null,
+      },
+    });
+
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    res.status(500).json({ message: `Failed ${error}` });
   }
 };

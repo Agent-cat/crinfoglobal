@@ -51,8 +51,8 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 py-8 px-6 text-justify">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen text-gray-900 bg-gray-50 pt-16 py-8 px-6 text-left">
+      <div className="max-w-6xl mx-auto">
         <header className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-[#083b7a] mb-4">Contact Us</h1>
           <p className="text-lg text-gray-600">
@@ -61,14 +61,14 @@ const ContactPage = () => {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="space-y-12">
           {/* Contact Form */}
-          <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="bg-white rounded-xl shadow-lg p-8 w-full">
             <h2 className="text-2xl font-bold text-[#083b7a] mb-6">
               Send Message
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-1">
                 <label
                   htmlFor="name"
                   className="block text-sm font-medium text-gray-700 mb-2"
@@ -87,7 +87,7 @@ const ContactPage = () => {
                 />
               </div>
 
-              <div>
+              <div className="md:col-span-1">
                 <label
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700 mb-2"
@@ -106,7 +106,7 @@ const ContactPage = () => {
                 />
               </div>
 
-              <div>
+              <div className="md:col-span-2">
                 <label
                   htmlFor="subject"
                   className="block text-sm font-medium text-gray-700 mb-2"
@@ -125,7 +125,7 @@ const ContactPage = () => {
                 />
               </div>
 
-              <div>
+              <div className="md:col-span-2">
                 <label
                   htmlFor="message"
                   className="block text-sm font-medium text-gray-700 mb-2"
@@ -146,28 +146,30 @@ const ContactPage = () => {
 
               {submitStatus && (
                 <div
-                  className={`p-4 rounded-lg ${
-                    submitStatus.includes("successfully")
-                      ? "bg-green-50 text-green-700 border border-green-200"
-                      : "bg-red-50 text-red-700 border border-red-200"
-                  }`}
+                  className={`md:col-span-2 p-4 rounded-lg ${submitStatus.includes("successfully")
+                    ? "bg-green-50 text-green-700 border border-green-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                    }`}
                 >
                   {submitStatus}
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full px-6 py-3 bg-[#083b7a] text-white rounded-lg font-semibold hover:bg-[#0a4ea3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "Sending..." : "Send Message"}
-              </button>
+              <div className="md:col-span-2">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full px-6 py-3 bg-[#083b7a] text-white rounded-lg font-semibold hover:bg-[#0a4ea3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Sending..." : "Send Message"}
+                </button>
+              </div>
             </form>
           </div>
 
           {/* Contact Details */}
           <div className="space-y-8">
+
             <div className="bg-white rounded-xl shadow-lg p-8">
               <h2 className="text-2xl font-bold text-[#083b7a] mb-6">
                 Contact Details

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../hooks/useAuth';
 import { useVolumes } from '../../../hooks/useVolumes';
-import { useSubmittedArticles, usePublishedArticles, useCreateAndPublishArticle } from '../../../hooks/useArticles';
+import { useSubmittedArticles, usePublishedArticles, useCreateAndPublishArticle, usePublishArticle } from '../../../hooks/useArticles';
 import { useDownloadRequests } from '../../../hooks/useDownloadRequests';
 
 const PublishArticlesPage = () => {
@@ -13,14 +13,14 @@ const PublishArticlesPage = () => {
   const { data: submittedArticles = [], isLoading: submittedLoading } = useSubmittedArticles();
   const { data: publishedArticles = [], isLoading: publishedLoading } = usePublishedArticles();
   const { data: downloadRequests = [], isLoading: downloadLoading } = useDownloadRequests();
-  
+
   // Mutations
   const createAndPublishMutation = useCreateAndPublishArticle();
 
   // Local state
   const [expandedArticleId, setExpandedArticleId] = useState(null);
   const [publishing, setPublishing] = useState({});
-  
+
   // Publish article form state
   const [publishForm, setPublishForm] = useState({
     title: '',
@@ -37,25 +37,20 @@ const PublishArticlesPage = () => {
   const [submitMessage, setSubmitMessage] = useState('');
 
 
+  const publishArticleMutation = usePublishArticle();
+
   const handlePublish = async (articleId, issueId) => {
     if (!issueId) {
       alert('Please select an issue first');
       return;
     }
-    
-    setPublishing(prev => ({ ...prev, [articleId]: true }));
+
     try {
-      await publishArticle(articleId, issueId);
-      setSubmittedArticles((prev) => prev.filter(a => a.id !== articleId));
-      
-      // Refresh published articles count
-      const published = await listPublishedArticles();
-      console.log(`Article published! Total published: ${published.length}`);
+      await publishArticleMutation.mutateAsync({ articleId, issueId });
+      alert('Article published successfully!');
     } catch (error) {
       console.error('Failed to publish article:', error);
       alert('Failed to publish article. Please try again.');
-    } finally {
-      setPublishing(prev => ({ ...prev, [articleId]: false }));
     }
   };
 
@@ -76,7 +71,7 @@ const PublishArticlesPage = () => {
   const updateAuthor = (index, field, value) => {
     setPublishForm(prev => ({
       ...prev,
-      authors: prev.authors.map((author, i) => 
+      authors: prev.authors.map((author, i) =>
         i === index ? { ...author, [field]: value } : author
       )
     }));
@@ -84,20 +79,20 @@ const PublishArticlesPage = () => {
 
   const handlePublishArticle = async (e) => {
     e.preventDefault();
-    
+
     // Validate form
     if (!publishForm.title || !publishForm.abstract || !publishForm.issueId) {
       setSubmitMessage('Please fill in all required fields (Title, Abstract, and Issue)');
       return;
     }
-    
+
     if (!publishForm.authors.some(author => author.name && author.email)) {
       setSubmitMessage('Please add at least one author with name and email');
       return;
     }
-    
+
     setSubmitMessage('');
-    
+
     try {
       // Create FormData for file upload
       const formData = new FormData();
@@ -108,20 +103,20 @@ const PublishArticlesPage = () => {
       formData.append('doi', publishForm.doi);
       formData.append('issueId', publishForm.issueId);
       formData.append('authors', JSON.stringify(publishForm.authors));
-      
+
       if (publishForm.file) {
         formData.append('file', publishForm.file);
       }
-      
+
       if (publishForm.scriptFile) {
         formData.append('script', publishForm.scriptFile);
       }
-      
+
       // Use TanStack Query mutation
       await createAndPublishMutation.mutateAsync(formData);
-      
+
       setSubmitMessage('Article published successfully!');
-      
+
       // Reset form
       setPublishForm({
         title: '',
@@ -134,7 +129,7 @@ const PublishArticlesPage = () => {
         scriptFile: null,
         authors: [{ name: '', email: '', affiliation: '', superscript: '' }]
       });
-      
+
     } catch (error) {
       console.error('Failed to publish article:', error);
       setSubmitMessage(error.response?.data?.message || 'Failed to publish article. Please try again.');
@@ -165,17 +160,17 @@ const PublishArticlesPage = () => {
             </Link>
           </div>
         </div>
-        
+
         {/* Publish New Article Form */}
         <section className="bg-gray-50 rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Publish New Article</h2>
-          
+
           {submitMessage && (
             <div className={`mb-4 p-3 rounded-lg ${submitMessage.includes('successfully') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
               {submitMessage}
             </div>
           )}
-          
+
           <form onSubmit={handlePublishArticle} className="bg-white rounded-lg p-6 shadow-sm">
             <div className="grid md:grid-cols-2 gap-6">
               {/* Left Column */}
@@ -387,7 +382,7 @@ const PublishArticlesPage = () => {
               <div key={a.id} className="bg-white border rounded-lg p-4 shadow-sm">
                 <div className="font-semibold text-gray-800 mb-1">{a.title}</div>
                 <div className="text-sm text-gray-600 mb-3">{a.articleType}</div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-2 mb-3">
                   <button
                     className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-sm transition-colors"
@@ -397,13 +392,13 @@ const PublishArticlesPage = () => {
                   </button>
                   <select className="flex-1 border rounded px-2 py-1 text-sm" defaultValue="">
                     <option value="" disabled>Select Issue</option>
-                    {volumes.flatMap(v=> (v.issues||[]).map(i=> ({...i, volumeNumber: v.number}))).map(i => (
+                    {volumes.flatMap(v => (v.issues || []).map(i => ({ ...i, volumeNumber: v.number }))).map(i => (
                       <option key={i.id} value={i.id}>Vol {i.volumeNumber} - Issue {i.number} ({i.month} {i.year})</option>
                     ))}
                   </select>
-                  <button 
-                    className="px-3 py-1 rounded bg-[#083b7a] text-white hover:bg-[#0a4ea3] text-sm transition-colors" 
-                    onClick={(e)=>{
+                  <button
+                    className="px-3 py-1 rounded bg-[#083b7a] text-white hover:bg-[#0a4ea3] text-sm transition-colors"
+                    onClick={(e) => {
                       const select = e.currentTarget.previousSibling;
                       if (!select || !(select instanceof HTMLSelectElement) || !select.value) return;
                       handlePublish(a.id, select.value);
@@ -412,7 +407,7 @@ const PublishArticlesPage = () => {
                     Publish
                   </button>
                 </div>
-                
+
                 {expandedArticleId === a.id && (
                   <div className="text-sm text-gray-700 border-t pt-3 mt-3 space-y-2">
                     {a.keywords && <div><span className="font-medium">Keywords:</span> {a.keywords}</div>}
@@ -424,10 +419,10 @@ const PublishArticlesPage = () => {
                     )}
                     {a.pdfPath && (
                       <div className="flex items-center gap-2">
-                        <a 
-                          className="text-blue-700 hover:underline" 
-                          href={a.pdfPath.startsWith('/api/') ? `http://localhost:8000${a.pdfPath}` : a.pdfPath} 
-                          target="_blank" 
+                        <a
+                          className="text-blue-700 hover:underline"
+                          href={a.pdfPath.startsWith('/api/') ? `http://localhost:8000${a.pdfPath}` : a.pdfPath}
+                          target="_blank"
                           rel="noreferrer"
                         >
                           Download PDF
@@ -462,7 +457,7 @@ const PublishArticlesPage = () => {
                     Volume {a.issue.volume?.number} • Issue {a.issue.number} ({a.issue.month} {a.issue.year})
                   </div>
                 )}
-                
+
                 <div className="flex flex-col sm:flex-row gap-2 mb-3">
                   <button
                     className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-sm transition-colors"
@@ -471,7 +466,7 @@ const PublishArticlesPage = () => {
                     {expandedArticleId === a.id ? 'Hide Details' : 'View Details'}
                   </button>
                 </div>
-                
+
                 {expandedArticleId === a.id && (
                   <div className="text-sm text-gray-700 border-t pt-3 mt-3 space-y-2">
                     {a.doi && <div><span className="font-medium">DOI:</span> {a.doi}</div>}
@@ -484,10 +479,10 @@ const PublishArticlesPage = () => {
                     )}
                     {a.pdfPath && (
                       <div className="flex items-center gap-2">
-                        <a 
-                          className="text-blue-700 hover:underline" 
-                          href={a.pdfPath.startsWith('/api/') ? `http://localhost:8000${a.pdfPath}` : a.pdfPath} 
-                          target="_blank" 
+                        <a
+                          className="text-blue-700 hover:underline"
+                          href={a.pdfPath.startsWith('/api/') ? `http://localhost:8000${a.pdfPath}` : a.pdfPath}
+                          target="_blank"
                           rel="noreferrer"
                         >
                           Download PDF
@@ -525,8 +520,8 @@ const PublishArticlesPage = () => {
                   <div><span className="font-medium">Status:</span> {req.status}</div>
                 </div>
                 <div className="flex gap-2">
-                  {req.status !== 'APPROVED' && <button className="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 text-sm" onClick={async()=>{ await approveDownloadRequest(req.id); setDownloadRequests((prev)=>prev.map(r=> r.id===req.id ? {...r, status:'APPROVED'} : r)); }}>Approve</button>}
-                  {req.status === 'PENDING' && <button className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 text-sm" onClick={async()=>{ await denyDownloadRequest(req.id); setDownloadRequests((prev)=>prev.map(r=> r.id===req.id ? {...r, status:'DENIED'} : r)); }}>Deny</button>}
+                  {req.status !== 'APPROVED' && <button className="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 text-sm" onClick={async () => { await approveDownloadRequest(req.id); setDownloadRequests((prev) => prev.map(r => r.id === req.id ? { ...r, status: 'APPROVED' } : r)); }}>Approve</button>}
+                  {req.status === 'PENDING' && <button className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 text-sm" onClick={async () => { await denyDownloadRequest(req.id); setDownloadRequests((prev) => prev.map(r => r.id === req.id ? { ...r, status: 'DENIED' } : r)); }}>Deny</button>}
                 </div>
               </div>
             ))}

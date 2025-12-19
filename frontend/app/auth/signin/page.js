@@ -65,6 +65,11 @@ const SigninPage = () => {
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0a4ea3] focus:border-[#0a4ea3] transition-colors"
               placeholder="Enter your password"
             />
+            <div className="flex justify-end mt-1">
+              <Link href="/forgot-password" title="Forgot Password" id="forgot-password-link" className="text-sm font-semibold text-[#0a4ea3] hover:text-[#083b7a] transition-colors">
+                Forgot Password?
+              </Link>
+            </div>
           </div>
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg">

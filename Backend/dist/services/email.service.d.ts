@@ -2,6 +2,7 @@ export declare const sendOTPEmail: (email: string, otp: string) => Promise<boole
 export declare const generateOTP: () => string;
 export declare const sendEditorNotificationEmail: (articleData: any, pdfPath?: string, editorEmails?: string[]) => Promise<boolean>;
 export declare const sendUserSubmissionConfirmationEmail: (userEmail: string, articleData: any) => Promise<boolean>;
+export declare const sendPasswordResetEmail: (email: string, resetToken: string) => Promise<boolean>;
 export declare const sendOTPEmailDirect: (email: string, otp: string) => Promise<void>;
 export declare const sendEditorNotificationEmailDirect: (articleData: any, pdfPath?: string, editorEmails?: string[]) => Promise<void>;
 export declare const sendUserSubmissionConfirmationEmailDirect: (userEmail: string, articleData: any) => Promise<void>;

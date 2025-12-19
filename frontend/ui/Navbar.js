@@ -56,7 +56,7 @@ const Navbar = () => {
       setIsProfileOpen(false);
       authEvents.dispatch("logoutSuccess");
       router.push("/");
-    } catch (e) {}
+    } catch (e) { }
   };
 
   return (
@@ -66,13 +66,15 @@ const Navbar = () => {
           {/* Branding */}
           <Link
             href="/"
-            className="flex items-center hover:opacity-80 transition-opacity"
+            className="flex items-center hover:opacity-80 transition-opacity relative group"
             aria-label="Company Logo - Home"
           >
+            {/* Embossed effect - subtle white glow */}
+            <div className="absolute inset-0 bg-white/60 blur-xl rounded-full scale-150 transform -translate-x-2 pointer-events-none"></div>
             <img
               src="/fei.png"
               alt="Frontiers in Engineering and Informatics"
-              className="h-12 scale-150 w-auto"
+              className="h-16 scale-150 pt-1.5 w-auto relative z-10"
             />
           </Link>
 
@@ -89,11 +91,10 @@ const Navbar = () => {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
-                      isActive(link.href)
-                        ? "bg-white text-[#083b7a] shadow-sm font-semibold"
-                        : "text-white hover:bg-white/10 hover:shadow-sm"
-                    }`}
+                    className={`px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${isActive(link.href)
+                      ? "bg-white text-[#083b7a] shadow-sm font-semibold"
+                      : "text-white hover:bg-white/10 hover:shadow-sm"
+                      }`}
                     aria-current={isActive(link.href) ? "page" : undefined}
                   >
                     {link.label}
@@ -200,11 +201,10 @@ const Navbar = () => {
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsOpen(false)}
-                    className={`block w-full text-center px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
-                      isActive(link.href)
-                        ? "bg-white text-[#083b7a] shadow-sm font-semibold"
-                        : "text-white hover:bg-white/10 hover:shadow-sm"
-                    }`}
+                    className={`block w-full text-center px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${isActive(link.href)
+                      ? "bg-white text-[#083b7a] shadow-sm font-semibold"
+                      : "text-white hover:bg-white/10 hover:shadow-sm"
+                      }`}
                     aria-current={isActive(link.href) ? "page" : undefined}
                   >
                     {link.label}

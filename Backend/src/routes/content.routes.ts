@@ -20,7 +20,9 @@ const router = express.Router();
 router.post('/volumes', Protected, RequireEditor, async (req: any, res: any) => {
   const { number } = req.body;
   try {
-    const volume = await prisma.volume.create({ data: { number } });
+    const volume = await prisma.volume.create({
+      data: { number: typeof number === 'string' ? parseInt(number, 10) : number }
+    });
     res.status(201).json({ message: 'Created', data: volume });
   } catch (e: any) {
     res.status(400).json({ message: e.message });
@@ -31,7 +33,14 @@ router.post('/volumes/:volumeId/issues', Protected, RequireEditor, async (req: a
   const { volumeId } = req.params;
   const { number, month, year } = req.body;
   try {
-    const issue = await prisma.issue.create({ data: { number, month, year, volumeId } });
+    const issue = await prisma.issue.create({
+      data: {
+        number: typeof number === 'string' ? parseInt(number, 10) : number,
+        month,
+        year: typeof year === 'string' ? parseInt(year, 10) : year,
+        volumeId
+      }
+    });
     res.status(201).json({ message: 'Created', data: issue });
   } catch (e: any) {
     res.status(400).json({ message: e.message });
@@ -45,7 +54,7 @@ router.put('/volumes/:volumeId', Protected, RequireEditor, async (req: any, res:
   try {
     const volume = await prisma.volume.update({
       where: { id: volumeId },
-      data: { number },
+      data: { number: typeof number === 'string' ? parseInt(number, 10) : number },
     });
     res.status(200).json({ message: 'Updated', data: volume });
   } catch (e: any) {
@@ -57,7 +66,23 @@ router.put('/volumes/:volumeId', Protected, RequireEditor, async (req: any, res:
 router.delete('/volumes/:volumeId', Protected, RequireEditor, async (req: any, res: any) => {
   const { volumeId } = req.params;
   try {
-    await prisma.volume.delete({ where: { id: volumeId } });
+    await prisma.$transaction(async (tx) => {
+      // Find all issues for this volume
+      const issues = await tx.issue.findMany({ where: { volumeId } });
+      const issueIds = issues.map(i => i.id);
+
+      // Disconnect all articles from these issues
+      await tx.article.updateMany({
+        where: { issueId: { in: issueIds } },
+        data: { issueId: null }
+      });
+
+      // Delete the issues
+      await tx.issue.deleteMany({ where: { volumeId } });
+
+      // Delete the volume
+      await tx.volume.delete({ where: { id: volumeId } });
+    });
     res.status(200).json({ message: 'Deleted' });
   } catch (e: any) {
     res.status(400).json({ message: e.message });
@@ -71,7 +96,11 @@ router.put('/issues/:issueId', Protected, RequireEditor, async (req: any, res: a
   try {
     const issue = await prisma.issue.update({
       where: { id: issueId },
-      data: { number, month, year },
+      data: {
+        number: typeof number === 'string' ? parseInt(number, 10) : number,
+        month,
+        year: typeof year === 'string' ? parseInt(year, 10) : year
+      },
     });
     res.status(200).json({ message: 'Updated', data: issue });
   } catch (e: any) {
@@ -83,7 +112,16 @@ router.put('/issues/:issueId', Protected, RequireEditor, async (req: any, res: a
 router.delete('/issues/:issueId', Protected, RequireEditor, async (req: any, res: any) => {
   const { issueId } = req.params;
   try {
-    await prisma.issue.delete({ where: { id: issueId } });
+    await prisma.$transaction(async (tx) => {
+      // Disconnect all articles from this issue
+      await tx.article.updateMany({
+        where: { issueId },
+        data: { issueId: null }
+      });
+
+      // Delete the issue
+      await tx.issue.delete({ where: { id: issueId } });
+    });
     res.status(200).json({ message: 'Deleted' });
   } catch (e: any) {
     res.status(400).json({ message: e.message });

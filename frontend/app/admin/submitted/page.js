@@ -2,61 +2,35 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { checkAuth, listSubmittedArticles, listVolumes, publishArticle, listPublishedArticles } from '../../../utils/api';
+import { useAuth } from '../../../hooks/useAuth';
+import { useSubmittedArticles, usePublishArticle } from '../../../hooks/useArticles';
+import { useVolumes } from '../../../hooks/useVolumes';
 
 const SubmittedArticlesPage = () => {
   const router = useRouter();
-  const [authLoaded, setAuthLoaded] = useState(false);
-  const [user, setUser] = useState(null);
-  const [submittedArticles, setSubmittedArticles] = useState([]);
-  const [volumes, setVolumes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [publishing, setPublishing] = useState({});
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const me = await checkAuth();
-        setUser(me);
-        if (me?.role !== 'EDITOR') {
-          setAuthLoaded(true);
-          return;
-        }
-        const [articles, vols] = await Promise.all([listSubmittedArticles(), listVolumes()]);
-        setSubmittedArticles(articles);
-        setVolumes(vols);
-      } catch (_) {
-        setUser(null);
-      }
-      setAuthLoaded(true);
-      setLoading(false);
-    };
-    init();
-  }, []);
+  const { data: user, isLoading: authLoading } = useAuth();
+  const { data: submittedArticles = [], isLoading: articlesLoading } = useSubmittedArticles();
+  const { data: volumes = [], isLoading: volumesLoading } = useVolumes();
+  const publishArticleMutation = usePublishArticle();
 
   const handlePublish = async (articleId, issueId) => {
     if (!issueId) {
       alert('Please select an issue first');
       return;
     }
-    
-    setPublishing(prev => ({ ...prev, [articleId]: true }));
+
     try {
-      await publishArticle(articleId, issueId);
-      setSubmittedArticles((prev) => prev.filter(a => a.id !== articleId));
-      
-      // Refresh published articles count
-      const published = await listPublishedArticles();
-      console.log(`Article published! Total published: ${published.length}`);
+      await publishArticleMutation.mutateAsync({ articleId, issueId });
+      alert('Article published successfully!');
     } catch (error) {
       console.error('Failed to publish article:', error);
       alert('Failed to publish article. Please try again.');
-    } finally {
-      setPublishing(prev => ({ ...prev, [articleId]: false }));
     }
   };
 
-  if (!authLoaded) {
+  const loading = authLoading || articlesLoading || volumesLoading;
+
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-white mt-16 py-8 px-5">
         <div className="max-w-7xl mx-auto">
@@ -105,8 +79,8 @@ const SubmittedArticlesPage = () => {
             <Link href="/admin" className="px-4 py-2 rounded-lg border border-gray-300 text-sm hover:bg-gray-50 transition-colors text-center">
               ← Back to Admin
             </Link>
-            <button 
-              onClick={() => window.history.back()} 
+            <button
+              onClick={() => window.history.back()}
               className="px-4 py-2 rounded-lg border border-gray-300 text-sm hover:bg-gray-50 transition-colors"
             >
               ← Back
@@ -137,7 +111,7 @@ const SubmittedArticlesPage = () => {
         {/* Articles List */}
         <div className="bg-gray-50 rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Submitted Articles</h2>
-          
+
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map(i => (
@@ -150,8 +124,8 @@ const SubmittedArticlesPage = () => {
           ) : submittedArticles.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {submittedArticles.map(a => (
-                <div 
-                  key={a.id} 
+                <div
+                  key={a.id}
                   className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group"
                   onClick={() => router.push(`/admin/submitted/${a.id}`)}
                 >

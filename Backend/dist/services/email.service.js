@@ -17,9 +17,9 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false
     },
-    connectionTimeout: 10000, // 10 seconds (reduced for faster fallback)
-    greetingTimeout: 10000, // 10 seconds
-    socketTimeout: 10000, // 10 seconds
+    connectionTimeout: 30000, // 30 seconds
+    greetingTimeout: 30000, // 30 seconds
+    socketTimeout: 30000, // 30 seconds
     pool: true, // Use connection pooling
     maxConnections: 5,
     maxMessages: 10,
@@ -371,6 +371,57 @@ export const sendUserSubmissionConfirmationEmail = async (userEmail, articleData
         }
     }
     console.error('All user confirmation email send attempts failed:', lastError);
+    return false;
+};
+export const sendPasswordResetEmail = async (email, resetToken) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Password Reset - CrinfoGlobal Publishers',
+        html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #083b7a;">Password Reset Request</h2>
+        <p>You requested a password reset for your CrinfoGlobal Publishers account.</p>
+        <p>Please click the button below to reset your password. This link will expire in 1 hour.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" 
+             style="background-color: #083b7a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+            Reset Password
+          </a>
+        </div>
+        <p>If the button doesn't work, you can copy and paste the following link into your browser:</p>
+        <p style="word-break: break-all; color: #083b7a;">${resetLink}</p>
+        <p>If you didn't request this reset, please ignore this email and your password will remain unchanged.</p>
+        <hr style="margin: 30px 0;">
+        <p style="color: #666; font-size: 12px;">
+          CrinfoGlobal Publishers<br>
+          Kattur 641667 Pongalur SO TAMIL NADU 641667<br>
+          Contact: 9063500171 | info@crinfoglobal.com
+        </p>
+      </div>
+    `,
+    };
+    const maxRetries = process.env.NODE_ENV === 'production' ? 3 : 1;
+    let lastError;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            console.log(`Attempting to send password reset email (attempt ${attempt}/${maxRetries})`);
+            await sendEmailWithFallback(mailOptions);
+            console.log('Password reset email sent successfully');
+            return true;
+        }
+        catch (error) {
+            lastError = error;
+            console.error(`Email send attempt ${attempt} failed:`, error.message);
+            if (attempt < maxRetries) {
+                const delay = attempt * 2000;
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+    console.error('All email send attempts failed:', lastError);
     return false;
 };
 // ============================================================================

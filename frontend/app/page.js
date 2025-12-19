@@ -1,4 +1,6 @@
+"use client";
 import React from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -10,17 +12,45 @@ import {
   TrendingUp,
   CheckCircle,
   ExternalLink,
+  Wind,
+  Rocket,
+  Zap,
+  Cpu,
+  Microscope,
+  Activity,
+  Cloud,
+  Lock,
+  Monitor,
+  MessageSquare,
+  Wifi,
+  Layers,
+  Dna,
+  Binary,
+  Leaf,
+  Shield,
+  Box,
+  Lightbulb,
 } from "lucide-react";
 
 const HomePage = () => {
   return (
     <div className="min-h-screen bg-white text-justify">
-      {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-[#083b7a] to-[#0a4ea3] text-white py-20 mt-16 overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <div className="flex justify-center mb-8 relative">
+              {/* Embossed effect - subtle white glow */}
+              <div className="absolute inset-0 w-48 h-48 md:w-64 md:h-64 bg-white/40 blur-[64px] rounded-full left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+              <Link href="/" className="relative z-10">
+                <img
+                  src="/fei.png"
+                  alt="Frontiers in Engineering and Informatics"
+                  className="h-24 md:h-32 w-auto scale-110 md:scale-125 transform transition-transform hover:scale-130"
+                />
+              </Link>
+            </div>
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 leading-tight">
               Frontiers in Engineering and Informatics
             </h1>
             <p className="text-xl md:text-2xl mb-4 text-blue-100">
@@ -58,7 +88,7 @@ const HomePage = () => {
             <div className="w-24 h-1 bg-[#083b7a] mx-auto rounded-full"></div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto border border-gray-100 transform transition-all hover:scale-[1.01]">
+          <div className="bg-white text-justify rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto border border-gray-100 transform transition-all hover:scale-[1.01]">
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="flex-shrink-0">
                 <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#083b7a] to-[#0a4ea3] flex items-center justify-center text-white relative overflow-hidden">
@@ -91,7 +121,7 @@ const HomePage = () => {
       </section>
 
       {/* Editorial Sponsor Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 text-justify bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -192,72 +222,191 @@ const HomePage = () => {
       </section>
 
       {/* Research Areas */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-32 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Research Areas
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-24"
+          >
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 tracking-tight">
+              Research <span className="text-[#083b7a]">Specializations</span>
             </h2>
-            <div className="w-24 h-1 bg-[#083b7a] mx-auto rounded-full mb-6"></div>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              We publish cutting-edge research across diverse fields of
-              engineering and informatics
+            <div className="w-20 h-1.5 bg-gradient-to-r from-[#083b7a] to-blue-400 mx-auto rounded-full mb-8"></div>
+            <p className="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
+              Explore our core domains where innovation meets academic excellence across engineering and digital frontiers.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-              <h3 className="text-2xl font-bold text-[#083b7a] mb-4 flex items-center gap-2">
-                <FileText className="w-6 h-6" />
-                Engineering
-              </h3>
-              <ul className="space-y-2 text-gray-700">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Civil and Structural Engineering</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Mechanical and Manufacturing Engineering</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Electrical and Electronics Engineering</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Chemical and Materials Engineering</span>
-                </li>
-              </ul>
+          <div className="space-y-40">
+            {/* Engineering Segment */}
+            <div className="flex flex-col lg:flex-row gap-16">
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="lg:w-1/3"
+              >
+                <div className="sticky top-32">
+                  <h3 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">Advanced Engineering</h3>
+                  <p className="text-gray-500 text-lg leading-relaxed mb-8">
+                    Developing hardware and structural foundations for the physical world, from nanoscale devices to aerospace exploration.
+                  </p>
+                  <div className="flex gap-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="w-8 h-1 bg-blue-100 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: "100%" }}
+                          transition={{ duration: 1, delay: i * 0.2 }}
+                          className="h-full bg-blue-600"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+
+              <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { title: "Environmental Engineering", desc: "Sustainable water treatment and air quality management solutions.", icon: Wind },
+                  { title: "Aerospace Systems", desc: "Propulsion, aerodynamics, and space exploration tech.", icon: Rocket },
+                  { title: "Renewable Energy", desc: "Solar, wind, and hydroelectric efficiency innovations.", icon: Zap },
+                  { title: "Robotics & AI", desc: "Industrial automation and autonomous machine design.", icon: Cpu },
+                  { title: "Nanotechnology", desc: "Materials and devices at the atomic scale.", icon: Microscope },
+                  { title: "Biomedical Systems", desc: "Engineering for healthcare and medical devices.", icon: Activity },
+                ].map((item, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.05 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:bg-white hover:shadow-xl transition-all"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
+                      <item.icon className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h4>
+                    <p className="text-gray-500 text-xs leading-relaxed">{item.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
 
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-              <h3 className="text-2xl font-bold text-[#083b7a] mb-4 flex items-center gap-2">
-                <FileText className="w-6 h-6" />
-                Informatics
-              </h3>
-              <ul className="space-y-2 text-gray-700">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Computer Science and Software Engineering</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Artificial Intelligence and Machine Learning</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Data Science and Big Data Analytics</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Cybersecurity and Information Systems</span>
-                </li>
-              </ul>
+            {/* Informatics Segment */}
+            <div className="flex flex-col lg:flex-row-reverse gap-16">
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="lg:w-1/3"
+              >
+                <div className="sticky top-32 lg:text-right">
+                  <h3 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">Digital Informatics</h3>
+                  <p className="text-gray-500 text-lg leading-relaxed mb-8">
+                    The software, data, and intelligent systems driving the global digital transformation and quantum future.
+                  </p>
+                  <div className="flex gap-2 lg:justify-end">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="w-8 h-1 bg-indigo-100 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: "100%" }}
+                          transition={{ duration: 1, delay: i * 0.2 }}
+                          className="h-full bg-indigo-600"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+
+              <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { title: "Cloud & Distributed", desc: "Scalable and fault-tolerant computing infrastructure.", icon: Cloud },
+                  { title: "Blockchain & Security", desc: "Decentralized trust and cryptographic protocols.", icon: Lock },
+                  { title: "User Interaction", desc: "HCI design and digital user experience.", icon: Monitor },
+                  { title: "Quantum Computing", desc: "Revolutionary processing and cryptography.", icon: Binary },
+                  { title: "Bioinformatics", desc: "Analyzing biological data via computation.", icon: Dna },
+                  { title: "Smart City & IoT", desc: "Integrated devices for urban optimization.", icon: Wifi },
+                  { title: "Immersive Tech", desc: "VR/AR for training and education.", icon: Layers },
+                  { title: "AI/NLP", desc: "Advanced language and intelligence models.", icon: MessageSquare },
+                ].map((item, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.05 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:bg-white hover:shadow-xl transition-all"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mb-4">
+                      <item.icon className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h4>
+                    <p className="text-gray-500 text-xs leading-relaxed">{item.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Interdisciplinary Segment */}
+            <div className="flex flex-col lg:flex-row gap-16">
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="lg:w-1/3"
+              >
+                <div className="sticky top-32">
+                  <h3 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">Interdisciplinary Fusion</h3>
+                  <p className="text-gray-500 text-lg leading-relaxed mb-8">
+                    Where fields collide to solve complex socioeconomic and environmental challenges using technology.
+                  </p>
+                  <div className="space-y-4">
+                    {['Sustainability', 'Ethics', 'Innovation'].map((label, idx) => (
+                      <div key={idx} className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-teal-600" />
+                        <span className="text-sm font-semibold text-gray-700">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+
+              <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-5 gap-4">
+                {[
+                  { title: "AI for Sustainability", icon: Leaf, col: "md:col-span-3" },
+                  { title: "Cyber-Physical", icon: Box, col: "md:col-span-2" },
+                  { title: "Ethical Technology", icon: Shield, col: "md:col-span-2" },
+                  { title: "Computational Materials", icon: Lightbulb, col: "md:col-span-3" },
+                  { title: "Economic Innovation", icon: TrendingUp, col: "md:col-span-5" },
+                ].map((item, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    className={`group ${item.col} h-40 bg-gray-50 rounded-2xl p-6 flex items-center gap-6 border border-gray-100 hover:bg-white hover:shadow-xl transition-all relative overflow-hidden`}
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
+                    <div className="w-16 h-16 flex-shrink-0 rounded-2xl bg-white shadow-sm flex items-center justify-center">
+                      <item.icon className="w-8 h-8 text-teal-600" />
+                    </div>
+                    <h4 className="text-xl font-bold text-gray-900 relative z-10">{item.title}</h4>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 };

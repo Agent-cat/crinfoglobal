@@ -8,4 +8,6 @@ export declare const GetUserById: (req: any, res: any) => Promise<any>;
 export declare const VerifyOTP: (req: any, res: any) => Promise<any>;
 export declare const ResendOTP: (req: any, res: any) => Promise<any>;
 export declare const CheckAuth: (req: any, res: any) => Promise<void>;
+export declare const ForgotPassword: (req: any, res: any) => Promise<any>;
+export declare const ResetPassword: (req: any, res: any) => Promise<any>;
 //# sourceMappingURL=user.controller.d.ts.map

@@ -1,42 +1,20 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  checkAuth,
-  listPublishedArticles,
-  updateArticle,
-} from "../../../utils/api";
+import { usePublishedArticles, useUpdateArticle } from "../../../hooks/useArticles";
+import { useAuth } from "../../../hooks/useAuth";
 
 const PublishedArticlesPage = () => {
   const router = useRouter();
-  const [authLoaded, setAuthLoaded] = useState(false);
-  const [user, setUser] = useState(null);
-  const [publishedArticles, setPublishedArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: user, isLoading: authLoading } = useAuth();
+  const { data: publishedArticles = [], isLoading: articlesLoading } = usePublishedArticles();
   const [editingArticle, setEditingArticle] = useState(null);
   const [editForm, setEditForm] = useState({});
 
-  useEffect(() => {
-    const init = async () => {
-      setLoading(true); // Start loading
-      try {
-        const me = await checkAuth();
-        setUser(me);
-        if (me?.role !== "EDITOR") {
-          setAuthLoaded(true);
-          return;
-        }
-        const articles = await listPublishedArticles();
-        setPublishedArticles(articles);
-      } catch (_) {
-        setUser(null);
-      }
-      setAuthLoaded(true);
-      setLoading(false); // End loading
-    };
-    init();
-  }, []);
+  const loading = authLoading || articlesLoading;
+
+  const updateArticleMutation = useUpdateArticle();
 
   const handleEditClick = (article) => {
     setEditingArticle(article);
@@ -53,10 +31,10 @@ const PublishedArticlesPage = () => {
   const handleEditSave = async () => {
     if (!editingArticle) return;
     try {
-      await updateArticle(editingArticle.id, editForm);
-      // Refresh the articles list
-      const articles = await listPublishedArticles();
-      setPublishedArticles(articles);
+      await updateArticleMutation.mutateAsync({
+        articleId: editingArticle.id,
+        data: editForm
+      });
       setEditingArticle(null);
       setEditForm({});
       alert("Article updated successfully!");
@@ -71,7 +49,7 @@ const PublishedArticlesPage = () => {
     setEditForm({});
   };
 
-  if (!authLoaded) {
+  if (authLoading) {
     return (
       <div className="min-h-screen text-justify bg-white mt-16 py-8 px-5">
         <div className="max-w-7xl mx-auto">

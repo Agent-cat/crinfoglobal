@@ -5,7 +5,7 @@
 
 interface EmailJob {
   id: string;
-  type: 'otp' | 'editor_notification' | 'user_confirmation';
+  type: 'otp' | 'editor_notification' | 'user_confirmation' | 'password_reset';
   data: any;
   attempts: number;
   maxAttempts: number;
@@ -28,7 +28,7 @@ class EmailQueue {
    */
   addJob(type: EmailJob['type'], data: any, priority: boolean = false): string {
     const jobId = `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const job: EmailJob = {
       id: jobId,
       type,
@@ -48,7 +48,7 @@ class EmailQueue {
     }
 
     console.log(`[EmailQueue] Job added: ${jobId} (type: ${type}, queue size: ${this.queue.length})`);
-    
+
     // Trigger immediate processing if not already processing
     if (!this.processing) {
       this.processQueue();
@@ -66,7 +66,7 @@ class EmailQueue {
     }
 
     console.log('[EmailQueue] Starting background processing...');
-    
+
     // Process queue every 2 seconds
     this.processingInterval = setInterval(() => {
       if (this.queue.length > 0 && !this.processing) {
@@ -98,23 +98,23 @@ class EmailQueue {
 
     while (this.queue.length > 0) {
       const job = this.queue[0]; // Peek at first job
-      
+
       if (!job) {
         break; // Safety check
       }
-      
+
       try {
         console.log(`[EmailQueue] Processing job: ${job.id} (attempt ${job.attempts + 1}/${job.maxAttempts})`);
-        
+
         await this.processJob(job);
-        
+
         // Job succeeded, remove from queue
         this.queue.shift();
         console.log(`[EmailQueue] Job completed: ${job.id} (remaining: ${this.queue.length})`);
-        
+
       } catch (error: any) {
         job.attempts++;
-        
+
         if (job.attempts >= job.maxAttempts) {
           // Max attempts reached, remove from queue
           this.queue.shift();
@@ -157,6 +157,10 @@ class EmailQueue {
           job.data.userEmail,
           job.data.articleData
         );
+        break;
+
+      case 'password_reset':
+        await emailService.sendPasswordResetEmailDirect(job.data.email, job.data.resetToken);
         break;
 
       default:
@@ -208,6 +212,10 @@ export const queueEditorNotification = (
 
 export const queueUserConfirmation = (userEmail: string, articleData: any): string => {
   return emailQueue.addJob('user_confirmation', { userEmail, articleData });
+};
+
+export const queuePasswordReset = (email: string, resetToken: string): string => {
+  return emailQueue.addJob('password_reset', { email, resetToken }, true); // Priority
 };
 
 export const getQueueStatus = () => emailQueue.getStatus();

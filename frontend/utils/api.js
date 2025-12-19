@@ -67,6 +67,16 @@ export const resendOTP = async (email) => {
   return response.data;
 };
 
+export const forgotPassword = async (email) => {
+  const response = await api.post(`/forgot-password`, { email });
+  return response.data;
+};
+
+export const resetPassword = async (token, password) => {
+  const response = await api.post(`/reset-password`, { token, password });
+  return response.data;
+};
+
 export const logout = async () => {
   try {
     const res = await api.post(`/logout`);
@@ -100,6 +110,12 @@ contentApi.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // Add headers to prevent caching for admin/content operations
+  config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+  config.headers['Pragma'] = 'no-cache';
+  config.headers['Expires'] = '0';
+
   return config;
 });
 

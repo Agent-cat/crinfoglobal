@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  listSubmittedArticles, 
-  listPublishedArticles, 
+import {
+  listSubmittedArticles,
+  listPublishedArticles,
   publishArticle,
-  createAndPublishArticle 
+  createAndPublishArticle,
+  updateArticle
 } from '../utils/api';
 
 // Submitted Articles
@@ -20,7 +21,7 @@ export const useSubmittedArticles = () => {
       }
       return data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes (match global default)
+    staleTime: 0,
   });
 };
 
@@ -38,14 +39,14 @@ export const usePublishedArticles = () => {
       }
       return data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes (match global default)
+    staleTime: 0,
   });
 };
 
 // Publish Article Mutation
 export const usePublishArticle = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ articleId, issueId }) => publishArticle(articleId, issueId),
     onSuccess: () => {
@@ -59,12 +60,25 @@ export const usePublishArticle = () => {
 // Create and Publish Article Mutation
 export const useCreateAndPublishArticle = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (formData) => createAndPublishArticle(formData),
     onSuccess: () => {
       // Invalidate and refetch published articles
       queryClient.invalidateQueries({ queryKey: ['articles', 'published'] });
+    },
+  });
+};
+// Update Article Mutation
+export const useUpdateArticle = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ articleId, data }) => updateArticle(articleId, data),
+    onSuccess: () => {
+      // Invalidate and refetch articles
+      queryClient.invalidateQueries({ queryKey: ['articles', 'published'] });
+      queryClient.invalidateQueries({ queryKey: ['articles', 'submitted'] });
     },
   });
 };

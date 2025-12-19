@@ -11,11 +11,11 @@ const Step1Content = ({ form, updateField }) => (
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Full Title <span className="text-red-500">*</span>
       </label>
-      <input 
-        type="text" 
-        value={form.title} 
-        onChange={(e) => updateField('title', e.target.value)} 
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all" 
+      <input
+        type="text"
+        value={form.title}
+        onChange={(e) => updateField('title', e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all"
         placeholder="Enter your article title"
       />
     </div>
@@ -24,9 +24,9 @@ const Step1Content = ({ form, updateField }) => (
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Article Type <span className="text-red-500">*</span>
       </label>
-      <select 
-        value={form.articleType} 
-        onChange={(e) => updateField('articleType', e.target.value)} 
+      <select
+        value={form.articleType}
+        onChange={(e) => updateField('articleType', e.target.value)}
         className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all"
       >
         <option value="">Select a type</option>
@@ -42,11 +42,11 @@ const Step1Content = ({ form, updateField }) => (
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Keywords
       </label>
-      <input 
-        type="text" 
-        value={form.keywords} 
-        onChange={(e) => updateField('keywords', e.target.value)} 
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all" 
+      <input
+        type="text"
+        value={form.keywords}
+        onChange={(e) => updateField('keywords', e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all"
         placeholder="e.g., AI, machine learning, data mining"
       />
       <p className="mt-1 text-xs text-gray-500">Separate keywords with commas</p>
@@ -56,10 +56,10 @@ const Step1Content = ({ form, updateField }) => (
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Abstract <span className="text-red-500">*</span>
       </label>
-      <textarea 
-        value={form.abstract} 
-        onChange={(e) => updateField('abstract', e.target.value)} 
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all" 
+      <textarea
+        value={form.abstract}
+        onChange={(e) => updateField('abstract', e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all"
         rows={8}
         placeholder="Provide a brief summary of your research..."
       />
@@ -73,10 +73,10 @@ const Step2Content = ({ form, updateAuthor, addAuthor, removeAuthor }) => (
       <h3 className="text-lg font-semibold text-gray-900 mb-2">Author Information</h3>
       <p className="text-sm text-gray-600">Add all authors who contributed to this research</p>
     </div>
-    
+
     <div className="space-y-4">
       {form.authors.map((author, index) => (
-        <motion.div 
+        <motion.div
           key={index}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -86,9 +86,9 @@ const Step2Content = ({ form, updateAuthor, addAuthor, removeAuthor }) => (
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-medium text-gray-900">Author {index + 1}</h4>
             {form.authors.length > 1 && (
-              <button 
-                type="button" 
-                onClick={() => removeAuthor(index)} 
+              <button
+                type="button"
+                onClick={() => removeAuthor(index)}
                 className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,11 +103,11 @@ const Step2Content = ({ form, updateAuthor, addAuthor, removeAuthor }) => (
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Name {index === 0 && <span className="text-red-500">*</span>}
               </label>
-              <input 
-                type="text" 
-                value={author.name} 
-                onChange={(e) => updateAuthor(index, 'name', e.target.value)} 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a] bg-white" 
+              <input
+                type="text"
+                value={author.name}
+                onChange={(e) => updateAuthor(index, 'name', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a] bg-white"
                 placeholder="Full name"
               />
             </div>
@@ -115,31 +115,31 @@ const Step2Content = ({ form, updateAuthor, addAuthor, removeAuthor }) => (
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email {index === 0 && <span className="text-red-500">*</span>}
               </label>
-              <input 
-                type="email" 
-                value={author.email} 
-                onChange={(e) => updateAuthor(index, 'email', e.target.value)} 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a] bg-white" 
+              <input
+                type="email"
+                value={author.email}
+                onChange={(e) => updateAuthor(index, 'email', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a] bg-white"
                 placeholder="email@example.com"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Affiliation</label>
-              <input 
-                type="text" 
-                value={author.affiliation} 
-                onChange={(e) => updateAuthor(index, 'affiliation', e.target.value)} 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a] bg-white" 
+              <input
+                type="text"
+                value={author.affiliation}
+                onChange={(e) => updateAuthor(index, 'affiliation', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a] bg-white"
                 placeholder="Institution/Organization"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Superscript</label>
-              <input 
-                type="text" 
-                value={author.superscript} 
-                onChange={(e) => updateAuthor(index, 'superscript', e.target.value)} 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a] bg-white" 
+              <input
+                type="text"
+                value={author.superscript}
+                onChange={(e) => updateAuthor(index, 'superscript', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a] bg-white"
                 placeholder="e.g., 1*"
               />
             </div>
@@ -147,9 +147,9 @@ const Step2Content = ({ form, updateAuthor, addAuthor, removeAuthor }) => (
         </motion.div>
       ))}
     </div>
-    <button 
-      type="button" 
-      onClick={addAuthor} 
+    <button
+      type="button"
+      onClick={addAuthor}
       className="mt-4 px-4 py-2 rounded-lg border-2 border-[#083b7a] text-[#083b7a] hover:bg-[#e6f0ff] transition-colors font-medium flex items-center gap-2"
     >
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,21 +169,21 @@ const Step3Content = ({ form, updateField }) => (
 
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">Conflict of Interest</label>
-      <input 
-        type="text" 
-        value={form.conflictOfInterest} 
-        onChange={(e) => updateField('conflictOfInterest', e.target.value)} 
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all" 
+      <input
+        type="text"
+        value={form.conflictOfInterest}
+        onChange={(e) => updateField('conflictOfInterest', e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all"
         placeholder="The authors declare no conflict of interest."
       />
     </div>
 
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">Funding Information</label>
-      <textarea 
-        value={form.fundingInfo} 
-        onChange={(e) => updateField('fundingInfo', e.target.value)} 
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all" 
+      <textarea
+        value={form.fundingInfo}
+        onChange={(e) => updateField('fundingInfo', e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all"
         rows={3}
         placeholder="This work was supported by XYZ funding agency. Funding Reference ID: xxxxxxxxx"
       />
@@ -191,10 +191,10 @@ const Step3Content = ({ form, updateField }) => (
 
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">Data Availability Statement</label>
-      <textarea 
-        value={form.dataAvailability} 
-        onChange={(e) => updateField('dataAvailability', e.target.value)} 
-        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all" 
+      <textarea
+        value={form.dataAvailability}
+        onChange={(e) => updateField('dataAvailability', e.target.value)}
+        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#083b7a] focus:border-transparent transition-all"
         rows={3}
         placeholder="All data generated or analyzed during this study are included in this published article."
       />
@@ -214,10 +214,10 @@ const Step4Content = ({ form, updateField }) => (
         <label className="block text-sm font-medium text-gray-700 mb-3">
           Main Submission File (Word/PDF) <span className="text-red-500">*</span>
         </label>
-        <input 
-          type="file" 
-          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
-          onChange={(e) => updateField('mainFile', e.target.files?.[0] || null)} 
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          onChange={(e) => updateField('mainFile', e.target.files?.[0] || null)}
           className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#083b7a] file:text-white hover:file:bg-[#0a4ea3] file:cursor-pointer"
         />
         {form.mainFile && (
@@ -232,10 +232,10 @@ const Step4Content = ({ form, updateField }) => (
 
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-[#083b7a] transition-colors">
         <label className="block text-sm font-medium text-gray-700 mb-3">Additional ZIP (Optional)</label>
-        <input 
-          type="file" 
-          accept=".zip,application/zip,application/x-zip-compressed" 
-          onChange={(e) => updateField('additionalZip', e.target.files?.[0] || null)} 
+        <input
+          type="file"
+          accept=".zip,application/zip,application/x-zip-compressed"
+          onChange={(e) => updateField('additionalZip', e.target.files?.[0] || null)}
           className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#083b7a] file:text-white hover:file:bg-[#0a4ea3] file:cursor-pointer"
         />
         {form.additionalZip && (
@@ -251,9 +251,9 @@ const Step4Content = ({ form, updateField }) => (
 
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-[#083b7a] transition-colors">
         <label className="block text-sm font-medium text-gray-700 mb-3">Script File (Optional)</label>
-        <input 
-          type="file" 
-          onChange={(e) => updateField('scriptFile', e.target.files?.[0] || null)} 
+        <input
+          type="file"
+          onChange={(e) => updateField('scriptFile', e.target.files?.[0] || null)}
           className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#083b7a] file:text-white hover:file:bg-[#0a4ea3] file:cursor-pointer"
         />
         {form.scriptFile && (
@@ -341,7 +341,7 @@ const SubmitPage = () => {
   };
 
   const validateStep = (step) => {
-    switch(step) {
+    switch (step) {
       case 1:
         return form.title && form.articleType && form.abstract;
       case 2:
@@ -376,7 +376,7 @@ const SubmitPage = () => {
       setErrorMsg('');
       setSubmitting(true);
       const formData = new FormData();
-      Object.entries(rest).forEach(([k,v]) => {
+      Object.entries(rest).forEach(([k, v]) => {
         if (v !== undefined && v !== null) formData.append(k, v);
       });
       formData.append('authors', JSON.stringify(authors));
@@ -384,17 +384,17 @@ const SubmitPage = () => {
       if (additionalZip) formData.append('attachments', additionalZip);
       if (scriptFile) formData.append('script', scriptFile);
       await submitArticle(formData);
-      
+
       // Show success modal instead of alert
       setShowSuccessModal(true);
-      
+
       // Reset form and go back to step 1
       setCurrentStep(1);
-      setForm((prev)=>({
+      setForm((prev) => ({
         ...prev,
-        title:'', articleType:'', keywords:'', abstract:'', conflictOfInterest:'', fundingInfo:'', dataAvailability:'',
-        authors: [{ name:'', email:'', affiliation:'', superscript:'' }],
-        mainFile:null, additionalZip:null, scriptFile:null,
+        title: '', articleType: '', keywords: '', abstract: '', conflictOfInterest: '', fundingInfo: '', dataAvailability: '',
+        authors: [{ name: '', email: '', affiliation: '', superscript: '' }],
+        mainFile: null, additionalZip: null, scriptFile: null,
       }));
     } catch (err) {
       setErrorMsg('Failed to submit article');
@@ -464,16 +464,16 @@ const SubmitPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </motion.div>
-              
+
               {/* Success Message */}
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Article Submitted Successfully! 
+                Article Submitted Successfully!
               </h3>
               <p className="text-gray-600 mb-6 leading-relaxed">
-                Thank you for submitting your article to <strong>Frontiers in Engineering and Informatics</strong>. 
+                Thank you for submitting your article to <strong>Frontiers in Engineering and Informatics</strong>.
                 Your submission has been received and will undergo our peer review process.
               </p>
-              
+
               {/* Additional Info */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
                 <h4 className="font-semibold text-blue-900 mb-2">What happens next?</h4>
@@ -484,7 +484,7 @@ const SubmitPage = () => {
                   <li>• You'll receive updates on the review process via email</li>
                 </ul>
               </div>
-              
+
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
@@ -557,7 +557,7 @@ const SubmitPage = () => {
       <div className='min-h-screen text-black bg-white mt-16 py-8 px-5'>
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
@@ -567,7 +567,7 @@ const SubmitPage = () => {
           </motion.div>
 
           {/* Progress Steps */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -581,13 +581,12 @@ const SubmitPage = () => {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.1 * index }}
-                      className={`w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold transition-all duration-300 ${
-                        currentStep > step.number 
-                          ? 'bg-green-500 text-white' 
-                          : currentStep === step.number 
-                          ? 'bg-[#083b7a] text-white ring-4 ring-blue-100' 
+                      className={`w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold transition-all duration-300 ${currentStep > step.number
+                        ? 'bg-green-500 text-white'
+                        : currentStep === step.number
+                          ? 'bg-[#083b7a] text-white ring-4 ring-blue-100'
                           : 'bg-gray-200 text-gray-500'
-                      }`}
+                        }`}
                     >
                       {currentStep > step.number ? (
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -606,7 +605,7 @@ const SubmitPage = () => {
                   {index < steps.length - 1 && (
                     <div className="flex-1 h-1 mx-2 relative">
                       <div className="absolute inset-0 bg-gray-200 rounded"></div>
-                      <motion.div 
+                      <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: currentStep > step.number ? '100%' : '0%' }}
                         transition={{ duration: 0.3 }}
@@ -647,11 +646,10 @@ const SubmitPage = () => {
                   type="button"
                   onClick={prevStep}
                   disabled={currentStep === 1}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                    currentStep === 1
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${currentStep === 1
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -678,11 +676,10 @@ const SubmitPage = () => {
                   <button
                     type="submit"
                     disabled={submitting || !validateStep(4)}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                      submitting || !validateStep(4)
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-green-600 text-white hover:bg-green-700'
-                    }`}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${submitting || !validateStep(4)
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                      }`}
                   >
                     {submitting ? (
                       <>

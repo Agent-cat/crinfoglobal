@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  listDownloadRequests, 
-  approveDownloadRequest, 
-  denyDownloadRequest 
+import {
+  listDownloadRequests,
+  approveDownloadRequest,
+  denyDownloadRequest
 } from '../utils/api';
 
 export const useDownloadRequests = () => {
@@ -18,13 +18,13 @@ export const useDownloadRequests = () => {
       }
       return data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes (match global default)
+    staleTime: 0,
   });
 };
 
 export const useApproveDownloadRequest = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (requestId) => approveDownloadRequest(requestId),
     onSuccess: () => {
@@ -35,7 +35,7 @@ export const useApproveDownloadRequest = () => {
 
 export const useDenyDownloadRequest = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (requestId) => denyDownloadRequest(requestId),
     onSuccess: () => {
