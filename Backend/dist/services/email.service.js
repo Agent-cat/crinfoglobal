@@ -557,4 +557,36 @@ export const sendUserSubmissionConfirmationEmailDirect = async (userEmail, artic
     };
     await sendEmailWithFallback(mailOptions);
 };
+export const sendPasswordResetEmailDirect = async (email, resetToken) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Password Reset - CrinfoGlobal Publishers',
+        html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #083b7a;">Password Reset Request</h2>
+        <p>You requested a password reset for your CrinfoGlobal Publishers account.</p>
+        <p>Please click the button below to reset your password. This link will expire in 1 hour.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" 
+             style="background-color: #083b7a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+            Reset Password
+          </a>
+        </div>
+        <p>If the button doesn't work, you can copy and paste the following link into your browser:</p>
+        <p style="word-break: break-all; color: #083b7a;">${resetLink}</p>
+        <p>If you didn't request this reset, please ignore this email and your password will remain unchanged.</p>
+        <hr style="margin: 30px 0;">
+        <p style="color: #666; font-size: 12px;">
+          CrinfoGlobal Publishers<br>
+          Kattur 641667 Pongalur SO TAMIL NADU 641667<br>
+          Contact: 9063500171 | info@crinfoglobal.com
+        </p>
+      </div>
+    `,
+    };
+    await sendEmailWithFallback(mailOptions);
+};
 //# sourceMappingURL=email.service.js.map

@@ -4,7 +4,7 @@
  */
 interface EmailJob {
     id: string;
-    type: 'otp' | 'editor_notification' | 'user_confirmation';
+    type: 'otp' | 'editor_notification' | 'user_confirmation' | 'password_reset';
     data: any;
     attempts: number;
     maxAttempts: number;
@@ -44,7 +44,7 @@ declare class EmailQueue {
         processing: boolean;
         jobs: {
             id: string;
-            type: "otp" | "editor_notification" | "user_confirmation";
+            type: "otp" | "editor_notification" | "user_confirmation" | "password_reset";
             attempts: number;
             createdAt: Date;
         }[];
@@ -58,12 +58,13 @@ export declare const emailQueue: EmailQueue;
 export declare const queueOTPEmail: (email: string, otp: string) => string;
 export declare const queueEditorNotification: (articleData: any, pdfPath?: string, editorEmails?: string[]) => string;
 export declare const queueUserConfirmation: (userEmail: string, articleData: any) => string;
+export declare const queuePasswordReset: (email: string, resetToken: string) => string;
 export declare const getQueueStatus: () => {
     queueSize: number;
     processing: boolean;
     jobs: {
         id: string;
-        type: "otp" | "editor_notification" | "user_confirmation";
+        type: "otp" | "editor_notification" | "user_confirmation" | "password_reset";
         attempts: number;
         createdAt: Date;
     }[];

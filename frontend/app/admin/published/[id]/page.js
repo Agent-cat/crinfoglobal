@@ -2,12 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { checkAuth, listPublishedArticles } from '../../../../utils/api';
+import { checkAuth, listPublishedArticles, BASE_URL } from '../../../../utils/api';
 
 const PublishedArticleDetailPage = () => {
   const params = useParams();
   const articleId = params.id;
-  
+
   const [authLoaded, setAuthLoaded] = useState(false);
   const [user, setUser] = useState(null);
   const [article, setArticle] = useState(null);
@@ -101,8 +101,8 @@ const PublishedArticleDetailPage = () => {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Link 
-            href="/admin/published" 
+          <Link
+            href="/admin/published"
             className="flex items-center gap-2 text-gray-600 hover:text-[#083b7a] transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,8 +200,8 @@ const PublishedArticleDetailPage = () => {
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Keywords</h2>
                 <div className="flex flex-wrap gap-2">
                   {article.keywords.split(',').map((keyword, idx) => (
-                    <span 
-                      key={idx} 
+                    <span
+                      key={idx}
                       className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
                     >
                       {keyword.trim()}
@@ -215,21 +215,21 @@ const PublishedArticleDetailPage = () => {
             {(article.conflictOfInterest || article.fundingInfo || article.dataAvailability) && (
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-gray-900">Additional Information</h2>
-                
+
                 {article.conflictOfInterest && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-700 mb-1">Conflict of Interest</h3>
                     <p className="text-gray-600 text-sm">{article.conflictOfInterest}</p>
                   </div>
                 )}
-                
+
                 {article.fundingInfo && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-700 mb-1">Funding Information</h3>
                     <p className="text-gray-600 text-sm">{article.fundingInfo}</p>
                   </div>
                 )}
-                
+
                 {article.dataAvailability && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-700 mb-1">Data Availability</h3>
@@ -243,10 +243,10 @@ const PublishedArticleDetailPage = () => {
             {article.pdfPath && (
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Full Text</h2>
-                <a 
+                <a
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
-                  href={article.pdfPath.startsWith('/api/') ? `http://localhost:8000${article.pdfPath}` : article.pdfPath} 
-                  target="_blank" 
+                  href={article.pdfPath.startsWith('/api/') ? `${BASE_URL}${article.pdfPath}` : article.pdfPath}
+                  target="_blank"
                   rel="noreferrer"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

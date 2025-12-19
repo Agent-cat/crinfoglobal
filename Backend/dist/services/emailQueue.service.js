@@ -118,6 +118,9 @@ class EmailQueue {
             case 'user_confirmation':
                 await emailService.sendUserSubmissionConfirmationEmailDirect(job.data.userEmail, job.data.articleData);
                 break;
+            case 'password_reset':
+                await emailService.sendPasswordResetEmailDirect(job.data.email, job.data.resetToken);
+                break;
             default:
                 throw new Error(`Unknown job type: ${job.type}`);
         }
@@ -157,6 +160,9 @@ export const queueEditorNotification = (articleData, pdfPath, editorEmails) => {
 };
 export const queueUserConfirmation = (userEmail, articleData) => {
     return emailQueue.addJob('user_confirmation', { userEmail, articleData });
+};
+export const queuePasswordReset = (email, resetToken) => {
+    return emailQueue.addJob('password_reset', { email, resetToken }, true); // Priority
 };
 export const getQueueStatus = () => emailQueue.getStatus();
 export const clearQueue = () => emailQueue.clear();

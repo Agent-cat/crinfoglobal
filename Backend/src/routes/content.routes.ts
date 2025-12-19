@@ -6,6 +6,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { queueEditorNotification, queueUserConfirmation } from '../services/emailQueue.service.js';
+import { PDFParse } from 'pdf-parse';
 
 const uploadDir = path.join(process.cwd(), 'uploads', 'articles');
 const storage = multer.diskStorage({
@@ -150,11 +151,10 @@ router.post('/articles', Protected, upload.fields([
       pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(files.pdf[0].path)}`;
       try {
         const buffer = fs.readFileSync(files.pdf[0].path);
-        const text = buffer.toString('latin1');
-        const matches = text.match(/\/Type\s*\/Page\b/g);
-        if (matches && matches.length > 0) {
-          totalPages = matches.length;
-        }
+        const parser = new PDFParse({ data: buffer });
+        const info = await parser.getInfo();
+        totalPages = info.total;
+        await parser.destroy();
       } catch (_) {
         // ignore page count errors, leave null
       }
@@ -315,11 +315,10 @@ router.post('/articles/create-publish', Protected, RequireEditor, upload.fields(
       pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(files.file[0].path)}`;
       try {
         const buffer = fs.readFileSync(files.file[0].path);
-        const text = buffer.toString('latin1');
-        const matches = text.match(/\/Type\s*\/Page\b/g);
-        if (matches && matches.length > 0) {
-          totalPages = matches.length;
-        }
+        const parser = new PDFParse({ data: buffer });
+        const info = await parser.getInfo();
+        totalPages = info.total;
+        await parser.destroy();
       } catch (_) {
         // ignore page count errors, leave null
       }

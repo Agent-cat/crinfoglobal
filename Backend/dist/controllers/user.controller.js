@@ -1,9 +1,9 @@
 import prisma from "../utils/prisma.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/token.js";
-import { generateOTP, sendPasswordResetEmail } from "../services/email.service.js";
+import { generateOTP } from "../services/email.service.js";
 import crypto from "crypto";
-import { queueOTPEmail } from "../services/emailQueue.service.js";
+import { queueOTPEmail, queuePasswordReset } from "../services/emailQueue.service.js";
 export const Signin = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -343,7 +343,7 @@ export const ForgotPassword = async (req, res) => {
                 resetTokenExpires,
             },
         });
-        await sendPasswordResetEmail(email, resetToken);
+        queuePasswordReset(email, resetToken);
         res.status(200).json({ message: "If an account with that email exists, we have sent a password reset link." });
     }
     catch (error) {

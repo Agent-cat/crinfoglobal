@@ -24,7 +24,8 @@ if (!fs.existsSync(uploadDir)) {
 app.get("/", (_, res) => {
     res.send("hi");
 });
-app.listen(process.env.PORT, () => {
-    console.log(`Server running on http://localhost${process.env.PORT}`);
+const PORT = parseInt(process.env.PORT || "8000", 10);
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
 //# sourceMappingURL=index.js.map

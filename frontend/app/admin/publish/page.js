@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../hooks/useAuth';
 import { useVolumes } from '../../../hooks/useVolumes';
+import { BASE_URL } from '../../../utils/api';
 import { useSubmittedArticles, usePublishedArticles, useCreateAndPublishArticle, usePublishArticle } from '../../../hooks/useArticles';
 import { useDownloadRequests } from '../../../hooks/useDownloadRequests';
 
@@ -421,7 +422,7 @@ const PublishArticlesPage = () => {
                       <div className="flex items-center gap-2">
                         <a
                           className="text-blue-700 hover:underline"
-                          href={a.pdfPath.startsWith('/api/') ? `http://localhost:8000${a.pdfPath}` : a.pdfPath}
+                          href={a.pdfPath.startsWith('/api/') ? `${BASE_URL}${a.pdfPath}` : a.pdfPath}
                           target="_blank"
                           rel="noreferrer"
                         >
@@ -481,7 +482,7 @@ const PublishArticlesPage = () => {
                       <div className="flex items-center gap-2">
                         <a
                           className="text-blue-700 hover:underline"
-                          href={a.pdfPath.startsWith('/api/') ? `http://localhost:8000${a.pdfPath}` : a.pdfPath}
+                          href={a.pdfPath.startsWith('/api/') ? `${BASE_URL}${a.pdfPath}` : a.pdfPath}
                           target="_blank"
                           rel="noreferrer"
                         >

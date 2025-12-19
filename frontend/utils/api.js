@@ -2,6 +2,7 @@ import axios from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_AUTH_API_URL || "http://localhost:8000/api/auth";
 const CONTENT_URL = process.env.NEXT_PUBLIC_CONTENT_API_URL || "http://localhost:8000/api/content";
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000";
 
 
 const getToken = () => {

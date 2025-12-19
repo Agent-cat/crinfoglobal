@@ -1,7 +1,9 @@
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000";
+const API_BASE = `${BASE_URL}/api`;
 
 export async function getPublicVolumes() {
+  console.log('Fetching volumes from:', `${API_BASE}/content/public/volumes`);
   const res = await fetch(`${API_BASE}/content/public/volumes`, {
     next: { revalidate: 0 },
   });

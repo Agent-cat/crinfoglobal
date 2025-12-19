@@ -6,4 +6,5 @@ export declare const sendPasswordResetEmail: (email: string, resetToken: string)
 export declare const sendOTPEmailDirect: (email: string, otp: string) => Promise<void>;
 export declare const sendEditorNotificationEmailDirect: (articleData: any, pdfPath?: string, editorEmails?: string[]) => Promise<void>;
 export declare const sendUserSubmissionConfirmationEmailDirect: (userEmail: string, articleData: any) => Promise<void>;
+export declare const sendPasswordResetEmailDirect: (email: string, resetToken: string) => Promise<void>;
 //# sourceMappingURL=email.service.d.ts.map
