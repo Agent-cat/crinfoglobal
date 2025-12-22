@@ -61,15 +61,6 @@ const page = () => {
               </p>
             </div>
             <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
-              <h3 style={{ color: darkBlue, fontSize: 18, marginTop: 0, marginBottom: 8 }}>Prof. K Padmanaban</h3>
-              <p style={{ marginBottom: 8, fontWeight: 600 }}>Professor, Department of Computer Science and Engineering</p>
-              <p style={{ marginBottom: 8 }}>Koneru Lakshmaiah Education Foundation, Andhra Pradesh, India</p>
-              <p style={{ marginBottom: 0, fontSize: 14, color: textColor }}>
-                <strong>Area of Research:</strong> Social/semantic network analysis, natural language processing,
-                collective behavior modeling, risk communication, multi-modal analysis of personality
-              </p>
-            </div>
-            <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
               <h3 style={{ color: darkBlue, fontSize: 18, marginTop: 0, marginBottom: 8 }}>Dr. Shaji Kalistine Apolinmary</h3>
               <p style={{ marginBottom: 8, fontWeight: 600 }}>Professor, Dept of IT</p>
               <p style={{ marginBottom: 8 }}>University of Technology and Applied Sciences Al-MUSANNA, Sultanate of Oman</p>
@@ -86,6 +77,11 @@ const page = () => {
                 <strong>Area of Research:</strong> Sustainable IT, Education 5.0, physiological computing,
                 artificial intelligence, medical informatics
               </p>
+            </div>
+            <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
+              <h3 style={{ color: darkBlue, fontSize: 18, marginTop: 0, marginBottom: 8 }}>Prof. Tai-hoon Kim</h3>
+              <p style={{ marginBottom: 8, fontWeight: 600 }}>Professor, School of Electrical and Computer Engineering</p>
+              <p style={{ marginBottom: 8 }}>Yeosu Campus, Chonnam National University, 50, Daehak-ro, Yeosu-si, Jeollanam-do, 59626, Republic of Korea</p>
             </div>
           </div>
         </section>
@@ -139,6 +135,23 @@ const page = () => {
               <p style={{ marginBottom: 8 }}>VIT University, Chennai Campus, Chennai, Tamil Nadu, INDIA</p>
               <p style={{ marginBottom: 0, fontSize: 14, color: textColor }}>
                 <strong>Area of Research:</strong> Data Science, AI-driven Automation, Bioinformatics
+              </p>
+            </div>
+            <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
+              <h3 style={{ color: darkBlue, fontSize: 18, marginTop: 0, marginBottom: 8 }}>Prof. K Padmanaban</h3>
+              <p style={{ marginBottom: 8, fontWeight: 600 }}>Professor, Department of Computer Science and Engineering</p>
+              <p style={{ marginBottom: 8 }}>Koneru Lakshmaiah Education Foundation, Andhra Pradesh, India</p>
+              <p style={{ marginBottom: 0, fontSize: 14, color: textColor }}>
+                <strong>Area of Research:</strong> Social/semantic network analysis, natural language processing,
+                collective behavior modeling, risk communication, multi-modal analysis of personality
+              </p>
+            </div>
+            <div style={{ background: '#f8fafc', padding: 20, borderRadius: 8, border: `1px solid ${primaryBlue}/20` }}>
+              <h3 style={{ color: darkBlue, fontSize: 18, marginTop: 0, marginBottom: 8 }}>Dr. ASN Chakravarthy</h3>
+              <p style={{ marginBottom: 8, fontWeight: 600 }}>Professor, Department of CSE</p>
+              <p style={{ marginBottom: 8 }}>JNTUK - University College of Engineering, JNTU, Kakinada</p>
+              <p style={{ marginBottom: 0, fontSize: 14, color: textColor }}>
+                <strong>Area of Research:</strong> Computer Science and Engineering, Software Engineering, Data Structures and Algorithms
               </p>
             </div>
           </div>
