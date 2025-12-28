@@ -47,7 +47,7 @@ const AdminPage = () => {
     const { volumeId, number, month, year } = newIssue;
     if (!volumeId || !number || !month || !year) return;
     try {
-      await createIssue(volumeId, parseInt(number,10), month, parseInt(year,10));
+      await createIssue(volumeId, parseInt(number, 10), month, parseInt(year, 10));
       setNewIssue({ volumeId: '', number: '', month: '', year: '' });
       refetchVolumes();
     } catch (error) {
@@ -126,18 +126,18 @@ const AdminPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl md:text-3xl font-bold">Admin Panel</h1>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link href="/admin/submitted" className="px-4 py-2 rounded-lg bg-black text-white  transition-colors text-sm">
+          <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+            <Link href="/admin/submitted" className="px-4 py-2 rounded-lg bg-black text-white  transition-colors text-sm text-center">
               Submitted Articles
             </Link>
-            <Link href="/admin/published" className="px-4 py-2 rounded-lg bg-black text-white  transition-colors text-sm">
-               Published Articles
+            <Link href="/admin/published" className="px-4 py-2 rounded-lg bg-black text-white  transition-colors text-sm text-center">
+              Published Articles
             </Link>
-            <Link href="/admin/publish" className="px-4 py-2 rounded-lg bg-[#083b7a] text-white hover:bg-[#0a4ea3] transition-colors text-sm">
+            <Link href="/admin/publish" className="px-4 py-2 rounded-lg bg-[#083b7a] text-white hover:bg-[#0a4ea3] transition-colors text-sm text-center">
               📨 Publish Articles
             </Link>
-            <Link href="/admin/download-requests" className="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors text-sm">
-              📥 Download Requests
+            <Link href="/admin/download-requests" className="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors text-sm text-center">
+              📥 Full Access Requests
             </Link>
             <button onClick={() => window.history.back()} className="px-4 py-2 rounded-lg border border-gray-300 text-sm hover:bg-gray-50 transition-colors">
               ← Back
@@ -149,17 +149,17 @@ const AdminPage = () => {
           {/* Volumes & Issues Section */}
           <section className="bg-gray-50 w-full rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Volumes & Issues Management</h2>
-            
+
             {/* Add Volume Form */}
             <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
               <h3 className="font-medium mb-3 text-gray-700">Add New Volume</h3>
               <form onSubmit={handleCreateVolume} className="flex gap-2">
-                <input 
-                  type="number" 
-                  className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]" 
-                  placeholder="Volume number" 
-                  value={newVolumeNumber} 
-                  onChange={(e)=>setNewVolumeNumber(e.target.value)} 
+                <input
+                  type="number"
+                  className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                  placeholder="Volume number"
+                  value={newVolumeNumber}
+                  onChange={(e) => setNewVolumeNumber(e.target.value)}
                 />
                 <button className="px-4 py-2 rounded-lg bg-[#083b7a] text-white hover:bg-[#0a4ea3] transition-colors">
                   Add Volume
@@ -171,38 +171,38 @@ const AdminPage = () => {
             <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
               <h3 className="font-medium mb-3 text-gray-700">Add New Issue</h3>
               <form onSubmit={handleCreateIssue} className="space-y-3">
-                <select 
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]" 
-                  value={newIssue.volumeId} 
-                  onChange={(e)=>setNewIssue(s=>({...s, volumeId: e.target.value}))}
+                <select
+                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                  value={newIssue.volumeId}
+                  onChange={(e) => setNewIssue(s => ({ ...s, volumeId: e.target.value }))}
                 >
                   <option value="">Select Volume</option>
-                  {volumes.map(v=> <option key={v.id} value={v.id}>Volume {v.number}</option>)}
+                  {volumes.map(v => <option key={v.id} value={v.id}>Volume {v.number}</option>)}
                 </select>
-                <div className="grid grid-cols-3 gap-2">
-                  <input 
-                    type="number" 
-                    className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]" 
-                    placeholder="Issue #" 
-                    value={newIssue.number} 
-                    onChange={(e)=>setNewIssue(s=>({...s, number: e.target.value}))} 
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <input
+                    type="number"
+                    className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                    placeholder="Issue #"
+                    value={newIssue.number}
+                    onChange={(e) => setNewIssue(s => ({ ...s, number: e.target.value }))}
                   />
-                  <select 
-                    className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]" 
-                    value={newIssue.month} 
-                    onChange={(e)=>setNewIssue(s=>({...s, month: e.target.value}))}
+                  <select
+                    className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                    value={newIssue.month}
+                    onChange={(e) => setNewIssue(s => ({ ...s, month: e.target.value }))}
                   >
                     <option value="">Month</option>
-                    {['January','February','March','April','May','June','July','August','September','October','November','December'].map(m => (
+                    {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
                       <option key={m} value={m}>{m}</option>
                     ))}
                   </select>
-                  <input 
-                    type="number" 
-                    className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]" 
-                    placeholder="Year" 
-                    value={newIssue.year} 
-                    onChange={(e)=>setNewIssue(s=>({...s, year: e.target.value}))} 
+                  <input
+                    type="number"
+                    className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                    placeholder="Year"
+                    value={newIssue.year}
+                    onChange={(e) => setNewIssue(s => ({ ...s, year: e.target.value }))}
                   />
                 </div>
                 <button className="w-full px-4 py-2 rounded-lg bg-[#083b7a] text-white hover:bg-[#0a4ea3] transition-colors">
@@ -233,7 +233,7 @@ const AdminPage = () => {
                                 type="number"
                                 className="border rounded px-2 py-1 w-24"
                                 value={editingVolume.number}
-                                onChange={(e) => setEditingVolume({...editingVolume, number: e.target.value})}
+                                onChange={(e) => setEditingVolume({ ...editingVolume, number: e.target.value })}
                               />
                             ) : (
                               <span className="font-semibold text-gray-800">Volume {v.number}</span>
@@ -262,7 +262,7 @@ const AdminPage = () => {
                               ) : (
                                 <>
                                   <button
-                                    onClick={() => setEditingVolume({id: v.id, number: v.number})}
+                                    onClick={() => setEditingVolume({ id: v.id, number: v.number })}
                                     className="px-3 py-1 text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
                                   >
                                     Edit
@@ -301,7 +301,7 @@ const AdminPage = () => {
                                               type="number"
                                               className="border rounded px-2 py-1 w-20"
                                               value={editingIssue.number}
-                                              onChange={(e) => setEditingIssue({...editingIssue, number: e.target.value})}
+                                              onChange={(e) => setEditingIssue({ ...editingIssue, number: e.target.value })}
                                             />
                                           ) : (
                                             <span className="text-sm">#{issue.number}</span>
@@ -312,9 +312,9 @@ const AdminPage = () => {
                                             <select
                                               className="border rounded px-2 py-1"
                                               value={editingIssue.month}
-                                              onChange={(e) => setEditingIssue({...editingIssue, month: e.target.value})}
+                                              onChange={(e) => setEditingIssue({ ...editingIssue, month: e.target.value })}
                                             >
-                                              {['January','February','March','April','May','June','July','August','September','October','November','December'].map(m => (
+                                              {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(m => (
                                                 <option key={m} value={m}>{m}</option>
                                               ))}
                                             </select>
@@ -328,7 +328,7 @@ const AdminPage = () => {
                                               type="number"
                                               className="border rounded px-2 py-1 w-24"
                                               value={editingIssue.year}
-                                              onChange={(e) => setEditingIssue({...editingIssue, year: e.target.value})}
+                                              onChange={(e) => setEditingIssue({ ...editingIssue, year: e.target.value })}
                                             />
                                           ) : (
                                             <span className="text-sm">{issue.year}</span>
@@ -354,7 +354,7 @@ const AdminPage = () => {
                                             ) : (
                                               <>
                                                 <button
-                                                  onClick={() => setEditingIssue({id: issue.id, number: issue.number, month: issue.month, year: issue.year})}
+                                                  onClick={() => setEditingIssue({ id: issue.id, number: issue.number, month: issue.month, year: issue.year })}
                                                   className="px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700"
                                                 >
                                                   Edit
@@ -398,15 +398,15 @@ const AdminPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              
+
               <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
                 Confirm Deletion
               </h3>
-              
+
               <p className="text-center text-gray-600 mb-4">
                 Are you sure you want to delete <span className="font-semibold text-gray-900">{deleteConfirm.name}</span>?
               </p>
-              
+
               {deleteConfirm.type === 'volume' && deleteConfirm.issueCount > 0 && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
                   <p className="text-sm text-yellow-800">
@@ -414,11 +414,11 @@ const AdminPage = () => {
                   </p>
                 </div>
               )}
-              
+
               <p className="text-center text-sm text-gray-500 mb-6">
                 This action cannot be undone.
               </p>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteConfirm(null)}

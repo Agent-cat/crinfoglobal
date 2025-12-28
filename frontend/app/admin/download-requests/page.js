@@ -82,9 +82,9 @@ const DownloadRequestsPage = () => {
       // Sort by status priority: PENDING > APPROVED > DENIED
       const statusPriority = { 'PENDING': 0, 'APPROVED': 1, 'DENIED': 2 };
       const priorityDiff = statusPriority[a.status] - statusPriority[b.status];
-      
+
       if (priorityDiff !== 0) return priorityDiff;
-      
+
       // If same status, sort by date (newest first)
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
@@ -102,13 +102,13 @@ const DownloadRequestsPage = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-          <h1 className="text-2xl md:text-3xl font-bold">Download Requests</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Full Access Requests</h1>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/admin" className="px-4 py-2 rounded-lg border border-gray-300 text-sm hover:bg-gray-50 transition-colors text-center">
               ← Back to Admin
             </Link>
-            <button 
-              onClick={() => window.history.back()} 
+            <button
+              onClick={() => window.history.back()}
               className="px-4 py-2 rounded-lg border border-gray-300 text-sm hover:bg-gray-50 transition-colors"
             >
               ← Back
@@ -120,7 +120,7 @@ const DownloadRequestsPage = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-gray-50 rounded-lg p-4 text-center border-2 border-gray-200">
             <div className="text-2xl font-bold text-gray-700">{stats.total}</div>
-            <div className="text-sm text-gray-600">Total Requests</div>
+            <div className="text-sm text-gray-600">Total Full Access Requests</div>
           </div>
           <div className="bg-orange-50 rounded-lg p-4 text-center border-2 border-orange-200">
             <div className="text-2xl font-bold text-orange-600">{stats.pending}</div>
@@ -142,11 +142,10 @@ const DownloadRequestsPage = () => {
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === status
-                  ? 'bg-[#083b7a] text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === status
+                ? 'bg-[#083b7a] text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
             >
               {status}
             </button>
@@ -157,7 +156,7 @@ const DownloadRequestsPage = () => {
         <div className="bg-white rounded-lg shadow-sm overflow-hidden border">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-gray-50 border-b hidden sm:table-header-group">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Article</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Volume/Issue</th>
@@ -167,7 +166,7 @@ const DownloadRequestsPage = () => {
                   <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 block sm:table-row-group">
                 {downloadLoading ? (
                   <tr>
                     <td colSpan="6" className="px-4 py-8 text-center text-gray-500">
@@ -176,13 +175,15 @@ const DownloadRequestsPage = () => {
                   </tr>
                 ) : filteredRequests.length > 0 ? (
                   filteredRequests.map(req => (
-                    <tr key={req.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
+                    <tr key={req.id} className="hover:bg-gray-50 block sm:table-row bg-white rounded-lg shadow-sm sm:shadow-none mb-4 sm:mb-0 border sm:border-0 p-4 sm:p-0">
+                      <td className="sm:px-4 sm:py-3 block sm:table-cell mb-2 sm:mb-0">
+                        <span className="sm:hidden font-semibold text-gray-700 block mb-1">Article:</span>
                         <div className="font-medium text-gray-900 line-clamp-2">
                           {req.article?.title || 'Unknown Article'}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
+                      <td className="sm:px-4 sm:py-3 text-sm text-gray-600 block sm:table-cell mb-2 sm:mb-0">
+                        <span className="sm:hidden font-semibold text-gray-700 block mb-1">Volume/Issue:</span>
                         {req.article?.issue ? (
                           <div>
                             <div>Vol {req.article.issue.volume?.number ?? '—'}</div>
@@ -192,24 +193,26 @@ const DownloadRequestsPage = () => {
                           '—'
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
+                      <td className="sm:px-4 sm:py-3 text-sm text-gray-600 block sm:table-cell mb-2 sm:mb-0">
+                        <span className="sm:hidden font-semibold text-gray-700 block mb-1">Requested By:</span>
                         <div>{req.user?.userName || 'Unknown'}</div>
                         <div className="text-xs text-gray-500">{req.user?.email || req.userId}</div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                          req.status === 'PENDING' ? 'bg-orange-100 text-orange-800' :
+                      <td className="sm:px-4 sm:py-3 block sm:table-cell mb-2 sm:mb-0">
+                        <span className="sm:hidden font-semibold text-gray-700 block mb-1">Status:</span>
+                        <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${req.status === 'PENDING' ? 'bg-orange-100 text-orange-800' :
                           req.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                            'bg-red-100 text-red-800'
+                          }`}>
                           {req.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
+                      <td className="sm:px-4 sm:py-3 text-sm text-gray-600 block sm:table-cell mb-4 sm:mb-0">
+                        <span className="sm:hidden font-semibold text-gray-700 block mb-1">Date:</span>
                         {new Date(req.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex gap-2 justify-end">
+                      <td className="sm:px-4 sm:py-3 text-right block sm:table-cell">
+                        <div className="flex gap-2 justify-end sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0">
                           {req.status === 'PENDING' && (
                             <>
                               <button
@@ -252,7 +255,7 @@ const DownloadRequestsPage = () => {
                         No {filter !== 'ALL' ? filter.toLowerCase() : ''} requests found
                       </div>
                       <div className="text-sm text-gray-500">
-                        Download requests will appear here
+                        Full Access requests will appear here
                       </div>
                     </td>
                   </tr>

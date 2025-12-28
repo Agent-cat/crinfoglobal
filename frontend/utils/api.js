@@ -103,7 +103,13 @@ export const checkAuth = async () => {
 };
 
 // Content/admin API
-const contentApi = axios.create({ baseURL: CONTENT_URL, withCredentials: true });
+const contentApi = axios.create({ 
+  baseURL: CONTENT_URL, 
+  withCredentials: true,
+  maxContentLength: 15 * 1024 * 1024, // 15MB
+  maxBodyLength: 15 * 1024 * 1024, // 15MB
+  timeout: 300000 // 5 minutes timeout for large file uploads
+});
 
 // Add request interceptor to include JWT token in headers for content API
 contentApi.interceptors.request.use((config) => {
@@ -183,6 +189,11 @@ export const publishArticle = async (articleId, issueId) => {
 export const updateArticle = async (articleId, data) => {
   const res = await contentApi.put(`/articles/${articleId}`, data);
   return res.data.data;
+};
+
+export const deleteArticle = async (articleId) => {
+  const res = await contentApi.delete(`/articles/${articleId}`);
+  return res.data;
 };
 
 export const createAndPublishArticle = async (formData) => {

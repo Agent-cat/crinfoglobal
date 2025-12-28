@@ -9,13 +9,9 @@ export const useDownloadRequests = () => {
   return useQuery({
     queryKey: ['downloadRequests'],
     queryFn: async () => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔄 Fetching download requests...');
-      }
+
       const data = await listDownloadRequests();
-      if (process.env.NODE_ENV === 'development') {
-        console.log('✅ Download requests fetched:', data?.length || 0, 'items');
-      }
+
       return data;
     },
     staleTime: 0,

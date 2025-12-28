@@ -167,7 +167,15 @@ export const DeleteUser = async (req: any, res: any) => {
 
 export const GetAllUser = async (_req: any, res: any) => {
   try {
-    const data = await prisma.user.findMany();
+    const data = await prisma.user.findMany({
+      select: {
+        id: true,
+        userName: true,
+        email: true,
+        role: true,
+        emailVerified: true
+      }
+    });
     res.status(200).json({ message: "Success", data: data });
   } catch (error) {
     res.status(500).json({ message: `Failed ${error} ` });
@@ -348,9 +356,16 @@ export const ResendOTP = async (req: any, res: any) => {
 
 export const CheckAuth = async (req: any, res: any) => {
   try {
+    const pendingRequest = await prisma.downloadRequest.findFirst({
+      where: {
+        userId: req.user.id,
+        status: 'PENDING'
+      }
+    });
+
     res.status(200).json({
       message: "Success",
-      data: req.user
+      data: { ...req.user, hasPendingRequest: !!pendingRequest }
     });
   } catch (error: any) {
     console.log(`Error in checkAuth controller ${error.message}`);

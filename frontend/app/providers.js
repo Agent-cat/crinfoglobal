@@ -27,9 +27,7 @@ export default function Providers({ children }) {
     });
 
     // Log when QueryClient is created (only in development)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔵 TanStack Query: QueryClient created');
-    }
+
   }
 
   return (

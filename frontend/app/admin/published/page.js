@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { usePublishedArticles, useUpdateArticle } from "../../../hooks/useArticles";
+import { usePublishedArticles, useUpdateArticle, useDeleteArticle } from "../../../hooks/useArticles";
 import { useAuth } from "../../../hooks/useAuth";
 
 const PublishedArticlesPage = () => {
@@ -11,10 +11,28 @@ const PublishedArticlesPage = () => {
   const { data: publishedArticles = [], isLoading: articlesLoading } = usePublishedArticles();
   const [editingArticle, setEditingArticle] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
   const loading = authLoading || articlesLoading;
 
   const updateArticleMutation = useUpdateArticle();
+  const deleteArticleMutation = useDeleteArticle();
+
+  const handleDeleteClick = (articleId) => {
+    setDeleteConfirmation(articleId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmation) return;
+    try {
+      await deleteArticleMutation.mutateAsync(deleteConfirmation);
+      setDeleteConfirmation(null);
+      alert("Article deleted successfully.");
+    } catch (error) {
+      console.error("Failed to delete article:", error);
+      alert("Failed to delete article: " + error.message);
+    }
+  };
 
   const handleEditClick = (article) => {
     setEditingArticle(article);
@@ -31,9 +49,28 @@ const PublishedArticlesPage = () => {
   const handleEditSave = async () => {
     if (!editingArticle) return;
     try {
+      let dataToSend;
+
+      if (editForm.file) {
+        // Use FormData if file is being updated
+        const formData = new FormData();
+        formData.append('title', editForm.title);
+        formData.append('abstract', editForm.abstract);
+        formData.append('keywords', editForm.keywords);
+        formData.append('doi', editForm.doi);
+        formData.append('totalPages', editForm.totalPages);
+        formData.append('articleType', editForm.articleType);
+        formData.append('pdf', editForm.file);
+        dataToSend = formData;
+      } else {
+        // Use JSON if no file update
+        const { file, ...rest } = editForm;
+        dataToSend = rest;
+      }
+
       await updateArticleMutation.mutateAsync({
         articleId: editingArticle.id,
-        data: editForm
+        data: dataToSend
       });
       setEditingArticle(null);
       setEditForm({});
@@ -285,6 +322,15 @@ const PublishedArticlesPage = () => {
                       >
                         ✏️ Edit
                       </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(a.id);
+                        }}
+                        className="px-3 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700 transition-colors ml-2"
+                      >
+                        🗑️ Delete
+                      </button>
                       <svg
                         className="w-5 h-5 text-gray-400 group-hover:text-[#083b7a] transition-colors"
                         fill="none"
@@ -426,6 +472,24 @@ const PublishedArticlesPage = () => {
                       }
                     />
                   </div>
+
+                  {/* PDF Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Update PDF (optional)
+                    </label>
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, file: e.target.files[0] })
+                      }
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Upload a new PDF to replace the existing one.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Modal Actions */}
@@ -443,6 +507,31 @@ const PublishedArticlesPage = () => {
                     Cancel
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Delete Confirmation Modal */}
+        {deleteConfirmation && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-sm w-full p-6 shadow-xl">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Article?</h3>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete this article? This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleConfirmDelete}
+                  className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors font-medium"
+                >
+                  Delete
+                </button>
+                <button
+                  onClick={() => setDeleteConfirmation(null)}
+                  className="flex-1 px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>

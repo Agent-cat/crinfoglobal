@@ -4,7 +4,8 @@ import {
   listPublishedArticles,
   publishArticle,
   createAndPublishArticle,
-  updateArticle
+  updateArticle,
+  deleteArticle
 } from '../utils/api';
 
 // Submitted Articles
@@ -12,13 +13,9 @@ export const useSubmittedArticles = () => {
   return useQuery({
     queryKey: ['articles', 'submitted'],
     queryFn: async () => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔄 Fetching submitted articles...');
-      }
+
       const data = await listSubmittedArticles();
-      if (process.env.NODE_ENV === 'development') {
-        console.log('✅ Submitted articles fetched:', data?.length || 0, 'items');
-      }
+
       return data;
     },
     staleTime: 0,
@@ -30,13 +27,9 @@ export const usePublishedArticles = () => {
   return useQuery({
     queryKey: ['articles', 'published'],
     queryFn: async () => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔄 Fetching published articles...');
-      }
+
       const data = await listPublishedArticles();
-      if (process.env.NODE_ENV === 'development') {
-        console.log('✅ Published articles fetched:', data?.length || 0, 'items');
-      }
+
       return data;
     },
     staleTime: 0,
@@ -75,6 +68,20 @@ export const useUpdateArticle = () => {
 
   return useMutation({
     mutationFn: ({ articleId, data }) => updateArticle(articleId, data),
+    onSuccess: () => {
+      // Invalidate and refetch articles
+      queryClient.invalidateQueries({ queryKey: ['articles', 'published'] });
+      queryClient.invalidateQueries({ queryKey: ['articles', 'submitted'] });
+    },
+  });
+};
+
+// Delete Article Mutation
+export const useDeleteArticle = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (articleId) => deleteArticle(articleId),
     onSuccess: () => {
       // Invalidate and refetch articles
       queryClient.invalidateQueries({ queryKey: ['articles', 'published'] });

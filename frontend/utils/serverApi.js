@@ -22,7 +22,7 @@ export async function getIssue(issueId) {
 }
 
 export async function getArticle(articleId) {
-  const res = await fetch(`${API_BASE}/content/public/article/${articleId}`, {
+  const res = await fetch(`${API_BASE}/content/public/article/${encodeURIComponent(articleId)}`, {
     next: { revalidate: 0 },
   });
   if (!res.ok) throw new Error("Failed to fetch article");
@@ -35,6 +35,15 @@ export async function getPublishedArticles() {
     next: { revalidate: 0 },
   });
   if (!res.ok) throw new Error("Failed to fetch articles");
+  const data = await res.json();
+  return data.data;
+}
+
+export async function getLatestArticles() {
+  const res = await fetch(`${API_BASE}/content/public/articles/latest`, {
+    next: { revalidate: 0 },
+  });
+  if (!res.ok) throw new Error("Failed to fetch latest articles");
   const data = await res.json();
   return data.data;
 }

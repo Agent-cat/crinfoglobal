@@ -53,9 +53,64 @@ const HomePage = () => {
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 leading-tight">
               Frontiers in Engineering and Informatics
             </h1>
-            <p className="text-xl md:text-2xl mb-4 text-blue-100">
-              ISSN: 3049-3412 (Online)
-            </p>
+            <div className="text-xl md:text-2xl mb-8 text-blue-100 font-mono flex flex-col items-center gap-1">
+              <div>ISSN: 3049-3412 (Online)</div>
+            </div>
+
+            {/* Editor and Metadata Section */}
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 mb-8 max-w-5xl mx-auto border border-white/20 text-left">
+              <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start justify-between">
+
+                {/* Left Column: Metadata */}
+                <div className="space-y-3 font-mono text-sm md:text-base w-full lg:w-auto">
+                  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 border-b border-white/20 pb-3 mb-3">
+                    <span className="font-bold text-white uppercase tracking-wider">Editor-in-Chief:</span>
+                    <span className="text-blue-100 font-semibold text-lg">Dr. DINESH KUMAR ANGURAJ</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-blue-100">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white/70">e-ISSN:</span> 3049-3412
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white/70">Frequency:</span> 4 issues per year
+                    </div>
+                    <div className="flex items-center gap-2 md:col-span-2">
+                      <span className="font-bold text-white/70">Publisher:</span> Crinfo Global Publishers
+                    </div>
+                    <div className="flex items-center gap-2 md:col-span-2">
+                      <span className="font-bold text-white/70">Publication URL:</span>
+                      <span className="break-all">https://doi.org/10.63949/crinfo</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white/70">Starting Year:</span> 2024
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Logos */}
+                <div className="flex flex-wrap justify-center lg:justify-end gap-6 items-center flex-1">
+                  {/* Google Scholar */}
+                  <div className="bg-white p-3 rounded-lg shadow-lg hover:scale-105 transition-transform">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Scholar_logo.svg"
+                      alt="Google Scholar"
+                      className="h-12 w-auto"
+                    />
+                  </div>
+
+                  {/* Crossref */}
+                  <div className="bg-white p-3 rounded-lg shadow-lg hover:scale-105 transition-transform">
+                    <img
+                      src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fipmuonline.com%2Fwp-content%2Fuploads%2F2021%2F04%2Fcrossref.jpg&f=1&nofb=1&ipt=bff95b089ed0e9da805bbc49f817bda609ddaaa868ba5e8424b8dbdd392978e8"
+                      alt="Crossref"
+                      className="h-12 w-auto"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <p className="text-lg md:text-xl max-w-4xl mx-auto mb-8 text-blue-50 leading-relaxed">
               Dedicated to publishing high-quality research that advances the
               fields of engineering and informatics. We welcome original

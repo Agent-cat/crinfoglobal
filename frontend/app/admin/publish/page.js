@@ -163,7 +163,7 @@ const PublishArticlesPage = () => {
         </div>
 
         {/* Publish New Article Form */}
-        <section className="bg-gray-50 rounded-lg p-6">
+        <section className="bg-gray-50 rounded-lg p-4 md:p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Publish New Article</h2>
 
           {submitMessage && (
@@ -292,7 +292,7 @@ const PublishArticlesPage = () => {
               <h3 className="text-lg font-medium text-gray-800 mb-4">Authors</h3>
               <div className="space-y-4">
                 {publishForm.authors.map((author, index) => (
-                  <div key={index} className="grid md:grid-cols-4 gap-4 p-4 border rounded-lg bg-gray-50">
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg bg-gray-50">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Name <span className="text-red-500">*</span>

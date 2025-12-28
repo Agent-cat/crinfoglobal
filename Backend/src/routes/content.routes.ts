@@ -13,7 +13,13 @@ const storage = multer.diskStorage({
   destination: (_req: Request, _file: Express.Multer.File, cb: (error: any, destination: string) => void) => cb(null, uploadDir),
   filename: (_req: Request, file: Express.Multer.File, cb: (error: any, filename: string) => void) => cb(null, `${Date.now()}-${file.originalname}`),
 });
-const upload = multer({ storage });
+// Allow up to 15MB file uploads (15 * 1024 * 1024 bytes)
+const upload = multer({ 
+  storage,
+  limits: { 
+    fileSize: 15 * 1024 * 1024 // 15MB
+  }
+});
 
 const router = express.Router();
 
@@ -149,14 +155,22 @@ router.post('/articles', Protected, upload.fields([
     let totalPages: number | null = null;
     if (files?.pdf?.[0]?.path) {
       pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(files.pdf[0].path)}`;
+      let parser: any = null;
       try {
-        const buffer = fs.readFileSync(files.pdf[0].path);
-        const parser = new PDFParse({ data: buffer });
+        const buffer = await fs.promises.readFile(files.pdf[0].path);
+        parser = new PDFParse({ data: buffer });
         const info = await parser.getInfo();
         totalPages = info.total;
-        await parser.destroy();
       } catch (_) {
         // ignore page count errors, leave null
+      } finally {
+        if (parser) {
+          try {
+            await parser.destroy();
+          } catch (e) {
+            console.error('Error destroying PDF parser:', e);
+          }
+        }
       }
     }
 
@@ -252,9 +266,12 @@ router.post('/articles/:articleId/publish', Protected, RequireEditor, async (req
 });
 
 // Editor: update Article
-router.put('/articles/:articleId', Protected, RequireEditor, async (req: any, res: any) => {
+router.put('/articles/:articleId', Protected, RequireEditor, upload.fields([
+  { name: 'pdf', maxCount: 1 }
+]), async (req: any, res: any) => {
   const { articleId } = req.params;
   const { title, abstract, keywords, doi, totalPages, articleType } = req.body;
+
   try {
     const updateData: any = {};
     if (title !== undefined) updateData.title = title;
@@ -264,11 +281,50 @@ router.put('/articles/:articleId', Protected, RequireEditor, async (req: any, re
     if (totalPages !== undefined) updateData.totalPages = parseInt(totalPages);
     if (articleType !== undefined) updateData.articleType = articleType;
 
+    // Handle PDF upload if present
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    if (files?.pdf?.[0]?.path) {
+      const pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(files.pdf[0].path)}`;
+      updateData.pdfPath = pdfPublicPath;
+
+      // Try to update page count from new PDF
+      let parser: any = null;
+      try {
+        const buffer = await fs.promises.readFile(files.pdf[0].path);
+        parser = new PDFParse({ data: buffer });
+        const info = await parser.getInfo();
+        updateData.totalPages = info.total;
+      } catch (_) {
+        // ignore page count errors
+      } finally {
+        if (parser) {
+          try {
+            await parser.destroy();
+          } catch (e) {
+            console.error('Error destroying PDF parser:', e);
+          }
+        }
+      }
+    }
+
     const updated = await prisma.article.update({
       where: { id: articleId },
       data: updateData,
     });
     res.status(200).json({ message: 'Updated', data: updated });
+  } catch (e: any) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
+// Editor: delete Article
+router.delete('/articles/:articleId', Protected, RequireEditor, async (req: any, res: any) => {
+  const { articleId } = req.params;
+  try {
+    await prisma.article.delete({
+      where: { id: articleId },
+    });
+    res.status(200).json({ message: 'Deleted' });
   } catch (e: any) {
     res.status(400).json({ message: e.message });
   }
@@ -313,14 +369,22 @@ router.post('/articles/create-publish', Protected, RequireEditor, upload.fields(
 
     if (files?.file?.[0]?.path) {
       pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(files.file[0].path)}`;
+      let parser: any = null;
       try {
-        const buffer = fs.readFileSync(files.file[0].path);
-        const parser = new PDFParse({ data: buffer });
+        const buffer = await fs.promises.readFile(files.file[0].path);
+        parser = new PDFParse({ data: buffer });
         const info = await parser.getInfo();
         totalPages = info.total;
-        await parser.destroy();
       } catch (_) {
         // ignore page count errors, leave null
+      } finally {
+        if (parser) {
+          try {
+            await parser.destroy();
+          } catch (e) {
+            console.error('Error destroying PDF parser:', e);
+          }
+        }
       }
     }
 
@@ -386,20 +450,76 @@ router.get('/public/issue/:issueId', async (req: any, res: any) => {
   const { issueId } = req.params;
   const issue = await prisma.issue.findUnique({
     where: { id: issueId },
-    include: { volume: true, articles: { where: { status: 'PUBLISHED' } } },
+    include: {
+      volume: true,
+      articles: {
+        where: { status: 'PUBLISHED' },
+        orderBy: { publishedAt: 'asc' }
+      }
+    },
   });
   if (!issue) return res.status(404).json({ message: 'Issue not found' });
   res.json({ data: issue });
 });
 
+// Public: latest articles for sidebar
+router.get('/public/articles/latest', async (_req: any, res: any) => {
+  console.log('GET /public/articles/latest hit');
+  try {
+    console.log('Querying findMany...');
+    const articles = await prisma.article.findMany({
+      where: { status: 'PUBLISHED' },
+      take: 5,
+      orderBy: { publishedAt: 'desc' },
+      include: {
+        issue: {
+          include: { volume: true }
+        }
+      }
+    });
+    res.json({ data: articles });
+  } catch (e: any) {
+    res.status(400).json({ message: e.message });
+  }
+});
+
 // Public: article details and increment views
 router.get('/public/article/:articleId', async (req: any, res: any) => {
   const { articleId } = req.params;
-  const article = await prisma.article.update({
-    where: { id: articleId },
-    data: { views: { increment: 1 } },
-  });
-  res.json({ data: article });
+
+  try {
+    // Try to find by DOI first
+    let article = await prisma.article.findFirst({
+      where: { doi: articleId },
+      include: { issue: { include: { volume: true } } }
+    });
+
+    // If not found by DOI, try by ID (if it looks like a UUID to avoid DB errors)
+    if (!article) {
+      // Basic UUID regex check
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(articleId);
+      if (isUuid) {
+        article = await prisma.article.findUnique({
+          where: { id: articleId },
+          include: { issue: { include: { volume: true } } }
+        });
+      }
+    }
+
+    if (!article) {
+      return res.status(404).json({ message: 'Article not found' });
+    }
+
+    // Increment views
+    await prisma.article.update({
+      where: { id: article.id },
+      data: { views: { increment: 1 } },
+    });
+
+    res.json({ data: article });
+  } catch (e: any) {
+    res.status(400).json({ message: e.message });
+  }
 });
 
 // Public: serve stored PDFs
@@ -412,9 +532,27 @@ router.get('/public/articles/pdf/:file', async (_req: any, res: any) => {
 router.post('/articles/:articleId/request-download', Protected, async (req: any, res: any) => {
   const { articleId } = req.params;
   const userId = req.user.id;
+  const user = req.user;
+
   try {
-    const existing = await prisma.downloadRequest.findFirst({ where: { articleId, userId, status: { in: ['PENDING', 'APPROVED'] } } });
-    if (existing) return res.json({ message: 'Already requested', data: existing });
+    // If user already has full access, no need to request
+    if (user.hasFullAccess) {
+      return res.status(200).json({ message: 'You already have full access', data: { status: 'APPROVED' } });
+    }
+
+    // Check for ANY pending request - enforce global single request policy
+    const pendingRequest = await prisma.downloadRequest.findFirst({
+      where: {
+        userId: req.user.id,
+        status: 'PENDING'
+      }
+    });
+
+    if (pendingRequest) {
+      return res.status(200).json({ message: 'Request already pending', data: pendingRequest });
+    }
+
+    // Create new request
     const created = await prisma.downloadRequest.create({ data: { articleId, userId } });
     res.status(201).json({ message: 'Request created', data: created });
   } catch (e: any) {
@@ -424,6 +562,21 @@ router.post('/articles/:articleId/request-download', Protected, async (req: any,
 
 // Editor: approve/deny
 router.post('/download-requests/:id/approve', Protected, RequireEditor, async (req: any, res: any) => {
+  const request = await prisma.downloadRequest.findUnique({
+    where: { id: req.params.id },
+    select: { userId: true }
+  });
+
+  if (!request) {
+    return res.status(404).json({ message: 'Request not found' });
+  }
+
+  // Grant global full access to the user
+  await prisma.user.update({
+    where: { id: request.userId },
+    data: { hasFullAccess: true }
+  });
+
   const updated = await prisma.downloadRequest.update({ where: { id: req.params.id }, data: { status: 'APPROVED' } });
   res.json({ data: updated });
 });
@@ -436,8 +589,22 @@ router.get('/download-requests', Protected, RequireEditor, async (_req: any, res
   const list = await prisma.downloadRequest.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
-      article: { include: { issue: { include: { volume: true } } } },
-      user: true,
+      article: {
+        select: {
+          id: true,
+          title: true,
+          issue: {
+            include: { volume: true }
+          }
+        }
+      },
+      user: {
+        select: {
+          id: true,
+          userName: true,
+          email: true
+        }
+      },
     },
   });
   res.json({ data: list });
@@ -447,16 +614,26 @@ router.get('/download-requests', Protected, RequireEditor, async (_req: any, res
 router.get('/articles/:articleId/download', Protected, async (req: any, res: any) => {
   const { articleId } = req.params;
   const userId = req.user.id;
+  const user = req.user;
+
   const article = await prisma.article.findUnique({ where: { id: articleId } });
   if (!article || !article.pdfPath) return res.status(404).json({ message: 'Not found' });
-  const approved = await prisma.downloadRequest.findFirst({ where: { articleId, userId, status: 'APPROVED' } });
-  if (!approved) return res.status(403).json({ message: 'Not approved' });
+
+  // Check for global full access OR specific approval
+  if (!user.hasFullAccess) {
+    const approved = await prisma.downloadRequest.findFirst({ where: { articleId, userId, status: 'APPROVED' } });
+    if (!approved) return res.status(403).json({ message: 'Not approved' });
+  }
   // pdfPath stores api url ending with filename
   const file = article.pdfPath.split('/').pop() as string;
   const filePath = path.join(uploadDir, file);
-  if (!fs.existsSync(filePath)) return res.status(404).end();
-  res.setHeader('Content-Type', 'application/pdf');
-  res.download(filePath);
+  try {
+    await fs.promises.access(filePath);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.download(filePath);
+  } catch {
+    return res.status(404).end();
+  }
 });
 
 router.get('/articles', Protected, RequireEditor, async (_req: any, res: any) => {
@@ -468,7 +645,23 @@ router.get('/articles', Protected, RequireEditor, async (_req: any, res: any) =>
 router.get('/articles/published', Protected, RequireEditor, async (_req: any, res: any) => {
   const articles = await prisma.article.findMany({
     where: { status: 'PUBLISHED' },
-    include: { issue: { include: { volume: true } } }
+    select: {
+      id: true,
+      title: true,
+      articleType: true,
+      abstract: true,
+      keywords: true,
+      doi: true,
+      totalPages: true,
+      views: true,
+      publishedAt: true,
+      createdAt: true,
+      status: true,
+      pdfPath: true,
+      issue: {
+        include: { volume: true }
+      }
+    }
   });
   res.json({ data: articles });
 });
