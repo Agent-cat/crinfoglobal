@@ -8,14 +8,46 @@ export async function generateMetadata({ params }) {
   const articleId = Array.isArray(slug) ? slug.join('/') : slug;
   try {
     const article = await getArticle(articleId);
+    if (!article) return { title: 'Article Not Found' };
+
+    const authors = typeof article.authorsJson === 'string'
+      ? JSON.parse(article.authorsJson)
+      : (article.authorsJson || []);
+
+    const publishDate = article.publishedAt ? new Date(article.publishedAt) : null;
+    const formattedDate = publishDate ? `${publishDate.getFullYear()}/${String(publishDate.getMonth() + 1).padStart(2, '0')}/${String(publishDate.getDate()).padStart(2, '0')}` : '';
+
+    const citationTags = {
+      'citation_journal_title': 'Frontiers in Engineering and Informatics',
+      'citation_issn': '3049-3412',
+      'citation_title': article.title,
+      'citation_publication_date': formattedDate,
+      'citation_volume': article.issue?.volume?.number?.toString() || '',
+      'citation_issue': article.issue?.number?.toString() || '',
+      'citation_doi': article.doi || '',
+      'citation_pdf_url': article.doi ? `https://fei.crinfoglobal.com/article_repo/${article.doi}.pdf` : '',
+    };
+
+    if (article.startPage) citationTags['citation_firstpage'] = article.startPage.toString();
+    if (article.endPage) citationTags['citation_lastpage'] = article.endPage.toString();
+
+    // Authors need to be separate meta tags, Next.js 'other' can handle arrays
+    const otherTags = { ...citationTags };
+    if (authors.length > 0) {
+      otherTags['citation_author'] = authors.map(a => a.name);
+    }
+
     return {
       title: `${article.title} | Crinfo Global Publishers`,
       description: article.abstract?.substring(0, 160),
+      other: otherTags
     };
   } catch (error) {
+    console.error('Error generating metadata:', error);
     return { title: 'Article | Crinfo Global Publishers' };
   }
 }
+
 
 const ArticlePage = async ({ params, searchParams }) => {
   const { slug } = await params;

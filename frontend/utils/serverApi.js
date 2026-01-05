@@ -47,3 +47,11 @@ export async function getLatestArticles() {
   const data = await res.json();
   return data.data;
 }
+export async function getAllPublishedArticles() {
+  const res = await fetch(`${API_BASE}/content/public/articles/all`, {
+    next: { revalidate: 3600 }, // Cache for 1 hour
+  });
+  if (!res.ok) throw new Error("Failed to fetch all published articles");
+  const data = await res.json();
+  return data.data;
+}

@@ -102,6 +102,31 @@ export default function ArticleContent({ article, initialTab }) {
     return (
         <>
             <div className='mt-6 animate-in fade-in duration-300'>
+                {/* Author Details Section */}
+                {authors && Array.isArray(authors) && authors.length > 0 && (
+                    <div className='mb-8 border-b pb-6'>
+                        <div className='flex flex-col gap-4'>
+                            {authors.map((author, i) => (
+                                <div key={i} className='flex flex-col'>
+                                    <span className='font-bold text-lg text-[#083b7a]'>{author.name}</span>
+                                    {author.affiliation && (
+                                        <span className='text-gray-600 text-sm italic'>{author.affiliation}</span>
+                                    )}
+                                    {author.email && (
+                                        <div className='flex items-center gap-1 mt-1'>
+                                            <svg className='w-3 h-3 text-gray-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' />
+                                            </svg>
+                                            <a href={`mailto:${author.email}`} className='text-blue-600 text-sm hover:underline'>
+                                                {author.email}
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <h2 className='text-lg font-semibold mb-4'>Abstract</h2>
                 <p className='text-gray-800 leading-relaxed whitespace-pre-wrap text-lg'>{article.abstract}</p>
 
@@ -139,13 +164,16 @@ export default function ArticleContent({ article, initialTab }) {
                             Cite
                         </button>
                         {article.pdfPath && (
-                            <button
+                            <a
+                                href={article.doi ? `/article_repo/${article.doi}.pdf` : '#'}
+                                target={article.doi ? "_blank" : undefined}
+                                rel={article.doi ? "noopener noreferrer" : undefined}
                                 className='px-5 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors font-medium flex items-center gap-2 shadow-sm'
-                                onClick={handleDownload}
+                                onClick={!article.doi ? handleDownload : undefined}
                             >
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" /></svg>
-                                Download PDF
-                            </button>
+                                {article.doi ? 'View PDF' : 'Download PDF'}
+                            </a>
                         )}
                     </div>
                 </div>
@@ -207,8 +235,8 @@ export default function ArticleContent({ article, initialTab }) {
                             {user?.hasFullAccess ?
                                 "You have full access to all articles. Click download to get the PDF." :
                                 user?.hasPendingRequest ?
-                                    "Your access request is pending approval. You'll be notified via email once approved." :
-                                    "This PDF is currently restricted. We'll notify the editors once you request access."
+                                    "You have a pending request for full access. You will be notified via email once an admin approves it." :
+                                    "Access restricted. Request full access once to download this and all other PDFs."
                             }
                         </p>
                         <div className='flex flex-col sm:flex-row justify-end gap-3'>
@@ -226,7 +254,7 @@ export default function ArticleContent({ article, initialTab }) {
                                         setShowModal(false);
                                     }}
                                 >
-                                    Request Download
+                                    Request Full Access
                                 </button>
                             )}
                         </div>

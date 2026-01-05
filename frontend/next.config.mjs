@@ -17,6 +17,14 @@ const nextConfig = {
             },
         ],
     },
+    async rewrites() {
+        return [
+            {
+                source: '/article_repo/:path*',
+                destination: `${process.env.NEXT_PUBLIC_CONTENT_API_URL}/article_repo/:path*`,
+            },
+        ];
+    },
 };
 
 export default nextConfig;

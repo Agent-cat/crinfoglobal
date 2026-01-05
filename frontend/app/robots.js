@@ -1,5 +1,5 @@
 export default function robots() {
-    const baseUrl = 'https://www.crinfoglobal.com';
+    const baseUrl = 'https://fei.crinfoglobal.com';
 
     return {
         rules: {
@@ -10,3 +10,4 @@ export default function robots() {
         sitemap: `${baseUrl}/sitemap.xml`,
     }
 }
+
