@@ -1,0 +1,45 @@
+[00:00:00.602] Server  LOG      ✓ Ready in 397ms
+[00:00:18.795] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:19.349] Server  ERROR   TypeError: fetch failed
+[00:00:22.653] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:22.811] Server  ERROR   TypeError: fetch failed
+[00:00:39.700] Server  ERROR   TypeError: fetch failed
+[00:00:40.674] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:40.848] Server  ERROR   TypeError: fetch failed
+[00:00:46.558] Server  LOG     Fetching volumes from: "http://localhost:8000/api/content/public/volumes"
+[00:00:53.988] Browser LOG     🔄 Checking authentication...
+[00:00:54.525] Browser LOG     ✅ Auth check complete: mandalavishnuvardhan07@gmail.com
+[00:01:13.742] Server  LOG     Revalidating tag: articles
+[00:01:13.742] Server  WARN    "revalidateTag" without the second argument is now deprecated, add second argument of "max" or use "updateTag". See more info here: https://nextjs.org/docs/messages/revalidate-tag-single-arg
+[00:01:13.774] Server  LOG     Revalidating tag: latest-articles
+[00:01:13.775] Server  WARN    "revalidateTag" without the second argument is now deprecated, add second argument of "max" or use "updateTag". See more info here: https://nextjs.org/docs/messages/revalidate-tag-single-arg
+[00:01:13.802] Server  LOG     Revalidating tag: article-123f5954-b756-41f3-8671-0dbc29956e44
+[00:01:13.802] Server  WARN    "revalidateTag" without the second argument is now deprecated, add second argument of "max" or use "updateTag". See more info here: https://nextjs.org/docs/messages/revalidate-tag-single-arg
+[00:01:13.826] Server  LOG     Revalidating tag: volumes
+[00:01:13.826] Server  WARN    "revalidateTag" without the second argument is now deprecated, add second argument of "max" or use "updateTag". See more info here: https://nextjs.org/docs/messages/revalidate-tag-single-arg
+[00:01:19.672] Server  LOG     Fetching volumes from: "http://localhost:8000/api/content/public/volumes"
+[00:01:28.978] Server  LOG     Fetching volumes from: "http://localhost:8000/api/content/public/volumes"
+[00:01:35.278] Server  ERROR   TypeError: fetch failed
+[00:02:21.898] Server  LOG     Fetching volumes from: "http://localhost:8000/api/content/public/volumes"
+[00:03:55.891] Server  LOG      ✓ Compiled in 406ms
+[00:09:31.093] Server  LOG     Fetching volumes from: "http://localhost:8000/api/content/public/volumes"
+[00:09:31.412] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:09:36.840] Browser LOG     🔄 Checking authentication...
+[00:09:39.333] Browser LOG     ✅ Auth check complete: mandalavishnuvardhan07@gmail.com
+[00:09:53.801] Server  LOG     Revalidating tag: articles
+[00:09:53.801] Server  WARN    "revalidateTag" without the second argument is now deprecated, add second argument of "max" or use "updateTag". See more info here: https://nextjs.org/docs/messages/revalidate-tag-single-arg
+[00:09:53.836] Server  LOG     Revalidating tag: latest-articles
+[00:09:53.836] Server  WARN    "revalidateTag" without the second argument is now deprecated, add second argument of "max" or use "updateTag". See more info here: https://nextjs.org/docs/messages/revalidate-tag-single-arg
+[00:09:53.866] Server  LOG     Revalidating tag: article-123f5954-b756-41f3-8671-0dbc29956e44
+[00:09:53.866] Server  WARN    "revalidateTag" without the second argument is now deprecated, add second argument of "max" or use "updateTag". See more info here: https://nextjs.org/docs/messages/revalidate-tag-single-arg
+[00:09:53.892] Server  LOG     Revalidating tag: volumes
+[00:09:53.893] Server  WARN    "revalidateTag" without the second argument is now deprecated, add second argument of "max" or use "updateTag". See more info here: https://nextjs.org/docs/messages/revalidate-tag-single-arg
+[00:09:58.543] Server  LOG     Fetching volumes from: "http://localhost:8000/api/content/public/volumes"
+[00:10:42.176] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:10:53.007] Browser LOG     🔄 Checking authentication...
+[00:10:53.603] Browser LOG     ✅ Auth check complete: mandalavishnuvardhan07@gmail.com
+[00:10:54.975] Server  ERROR   (node:36805) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[00:11:59.672] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:12:04.925] Browser LOG     🔄 Checking authentication...
+[00:12:05.472] Browser LOG     ✅ Auth check complete: mandalavishnuvardhan07@gmail.com

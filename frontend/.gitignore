@@ -14,7 +14,7 @@
 /coveragesitemap.xml
 
 # next.js
-/.next/
+
 /out/
 
 # production

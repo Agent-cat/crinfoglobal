@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///home/vishnu/Documents/projects/crinfoglobal/frontend/app/actions.js"],"sourcesContent":["'use server'\n\nimport { revalidateTag } from 'next/cache'\n\n/**\n * Revalidates a cache tag to ensure fresh data is fetched on the next request.\n * Useful for reflecting admin changes immediately in a cached environment.\n */\nexport async function revalidateContent(tag) {\n    if (!tag) return;\n    console.log(`Revalidating tag: ${tag}`);\n    revalidateTag(tag);\n}\n"],"names":[],"mappings":";;;;;;AAEA;;;;;AAMO,eAAe,kBAAkB,GAAG;IACvC,IAAI,CAAC,KAAK;IACV,QAAQ,GAAG,CAAC,CAAC,kBAAkB,EAAE,KAAK;IACtC,IAAA,8IAAa,EAAC;AAClB;;;IAJsB;;AAAA,+OAAA","debugId":null}},
+    {"offset": {"line": 29, "column": 0}, "map": {"version":3,"sources":["file:///home/vishnu/Documents/projects/crinfoglobal/frontend/.next-internal/server/app/admin/page/actions.js%20%28server%20actions%20loader%29"],"sourcesContent":["export {revalidateContent as '409d195f62bcc858bcd258b84f89912aed64cd766d'} from 'ACTIONS_MODULE0'\n"],"names":[],"mappings":";AAAA","debugId":null}}]
+}

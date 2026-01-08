@@ -1,0 +1,269 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [
+      {
+        "source": "/article_repo/:path*",
+        "destination": "http://localhost:8000/api/content/article_repo/:path*",
+        "regex": "^/article_repo(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
+      }
+    ],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/admin/published/[id]",
+      "regex": "^/admin/published/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/admin/published/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/admin/submitted/[id]",
+      "regex": "^/admin/submitted/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/admin/submitted/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/article/[...slug]",
+      "regex": "^/article/(.+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/article/(?<nxtPslug>.+?)(?:/)?$"
+    },
+    {
+      "page": "/issue/[issueId]",
+      "regex": "^/issue/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPissueId": "nxtPissueId"
+      },
+      "namedRegex": "^/issue/(?<nxtPissueId>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/about",
+      "regex": "^/about(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/about(?:/)?$"
+    },
+    {
+      "page": "/admin",
+      "regex": "^/admin(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin(?:/)?$"
+    },
+    {
+      "page": "/admin/download-requests",
+      "regex": "^/admin/download\\-requests(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/download\\-requests(?:/)?$"
+    },
+    {
+      "page": "/admin/publish",
+      "regex": "^/admin/publish(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/publish(?:/)?$"
+    },
+    {
+      "page": "/admin/published",
+      "regex": "^/admin/published(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/published(?:/)?$"
+    },
+    {
+      "page": "/admin/submitted",
+      "regex": "^/admin/submitted(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/submitted(?:/)?$"
+    },
+    {
+      "page": "/apc",
+      "regex": "^/apc(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/apc(?:/)?$"
+    },
+    {
+      "page": "/api/contact",
+      "regex": "^/api/contact(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/contact(?:/)?$"
+    },
+    {
+      "page": "/auth/signin",
+      "regex": "^/auth/signin(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/signin(?:/)?$"
+    },
+    {
+      "page": "/auth/signup",
+      "regex": "^/auth/signup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/signup(?:/)?$"
+    },
+    {
+      "page": "/contact",
+      "regex": "^/contact(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/contact(?:/)?$"
+    },
+    {
+      "page": "/editorial-board",
+      "regex": "^/editorial\\-board(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/editorial\\-board(?:/)?$"
+    },
+    {
+      "page": "/ethics",
+      "regex": "^/ethics(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/ethics(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/forgot-password",
+      "regex": "^/forgot\\-password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/forgot\\-password(?:/)?$"
+    },
+    {
+      "page": "/indexing",
+      "regex": "^/indexing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/indexing(?:/)?$"
+    },
+    {
+      "page": "/instructions",
+      "regex": "^/instructions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/instructions(?:/)?$"
+    },
+    {
+      "page": "/llm.txt",
+      "regex": "^/llm\\.txt(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/llm\\.txt(?:/)?$"
+    },
+    {
+      "page": "/overview",
+      "regex": "^/overview(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/overview(?:/)?$"
+    },
+    {
+      "page": "/privacy-policy",
+      "regex": "^/privacy\\-policy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/privacy\\-policy(?:/)?$"
+    },
+    {
+      "page": "/refunds",
+      "regex": "^/refunds(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/refunds(?:/)?$"
+    },
+    {
+      "page": "/reset-password",
+      "regex": "^/reset\\-password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/reset\\-password(?:/)?$"
+    },
+    {
+      "page": "/robots.txt",
+      "regex": "^/robots\\.txt(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/robots\\.txt(?:/)?$"
+    },
+    {
+      "page": "/sitemap.xml",
+      "regex": "^/sitemap\\.xml(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/sitemap\\.xml(?:/)?$"
+    },
+    {
+      "page": "/special-issues",
+      "regex": "^/special\\-issues(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/special\\-issues(?:/)?$"
+    },
+    {
+      "page": "/submit",
+      "regex": "^/submit(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/submit(?:/)?$"
+    },
+    {
+      "page": "/terms",
+      "regex": "^/terms(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/terms(?:/)?$"
+    },
+    {
+      "page": "/volumes",
+      "regex": "^/volumes(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/volumes(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

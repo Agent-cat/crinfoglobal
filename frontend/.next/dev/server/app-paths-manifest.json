@@ -1,0 +1,12 @@
+{
+  "/about/page": "app/about/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/admin/published/page": "app/admin/published/page.js",
+  "/article/[...slug]/page": "app/article/[...slug]/page.js",
+  "/auth/signin/page": "app/auth/signin/page.js",
+  "/contact/page": "app/contact/page.js",
+  "/issue/[issueId]/page": "app/issue/[issueId]/page.js",
+  "/page": "app/page.js",
+  "/submit/page": "app/submit/page.js",
+  "/volumes/page": "app/volumes/page.js"
+}

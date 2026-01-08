@@ -1,0 +1,20 @@
+{
+  "node": {
+    "40970c2075e74888b788b91d6535d7be88ac0bbbde": {
+      "workers": {
+        "app/admin/published/page": {
+          "moduleId": 15778,
+          "async": false,
+          "exportedName": "revalidateContent",
+          "filename": "app/actions.js"
+        }
+      },
+      "layer": {
+        "app/admin/published/page": "action-browser"
+      },
+      "exportedName": "revalidateContent",
+      "filename": "app/actions.js"
+    }
+  },
+  "edge": {}
+}

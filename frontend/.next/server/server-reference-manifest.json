@@ -1,0 +1,35 @@
+{
+  "node": {
+    "40970c2075e74888b788b91d6535d7be88ac0bbbde": {
+      "workers": {
+        "app/admin/page": {
+          "moduleId": 56731,
+          "async": false,
+          "exportedName": "revalidateContent",
+          "filename": "app/actions.js"
+        },
+        "app/admin/published/page": {
+          "moduleId": 15778,
+          "async": false,
+          "exportedName": "revalidateContent",
+          "filename": "app/actions.js"
+        },
+        "app/admin/submitted/[id]/page": {
+          "moduleId": 34600,
+          "async": false,
+          "exportedName": "revalidateContent",
+          "filename": "app/actions.js"
+        }
+      },
+      "layer": {
+        "app/admin/page": "action-browser",
+        "app/admin/published/page": "action-browser",
+        "app/admin/submitted/[id]/page": "action-browser"
+      },
+      "filename": "app/actions.js",
+      "exportedName": "revalidateContent"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "natD7K1wRhlv2w1eDOw1ZI6ofk1ku1b/+4uqXdR3nIk="
+}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["turbopack:///[project]/.next-internal/server/app/admin/submitted/[id]/page/actions.js (server actions loader)"],"sourcesContent":["export {revalidateContent as '40970c2075e74888b788b91d6535d7be88ac0bbbde'} from 'ACTIONS_MODULE0'\n"],"names":[],"mappings":"uCAAA,IAAA,EAAA,EAAA,CAAA,CAAA"}
