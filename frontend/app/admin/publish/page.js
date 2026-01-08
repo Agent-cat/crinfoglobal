@@ -6,6 +6,8 @@ import { useVolumes } from '../../../hooks/useVolumes';
 import { BASE_URL } from '../../../utils/api';
 import { useSubmittedArticles, usePublishedArticles, useCreateAndPublishArticle, usePublishArticle } from '../../../hooks/useArticles';
 import { useDownloadRequests } from '../../../hooks/useDownloadRequests';
+import { sanitizeText, sanitizeKeywords } from '../../../utils/sanitize';
+import { revalidateContent } from '@/app/actions';
 
 const PublishArticlesPage = () => {
   // TanStack Query hooks
@@ -48,6 +50,8 @@ const PublishArticlesPage = () => {
 
     try {
       await publishArticleMutation.mutateAsync({ articleId, issueId });
+      await revalidateContent('articles');
+      await revalidateContent('volumes');
       alert('Article published successfully!');
     } catch (error) {
       console.error('Failed to publish article:', error);
@@ -115,6 +119,10 @@ const PublishArticlesPage = () => {
 
       // Use TanStack Query mutation
       await createAndPublishMutation.mutateAsync(formData);
+
+      await revalidateContent('articles');
+      await revalidateContent('latest-articles');
+      await revalidateContent('volumes');
 
       setSubmitMessage('Article published successfully!');
 
@@ -381,7 +389,7 @@ const PublishArticlesPage = () => {
           <div className="space-y-4">
             {submittedArticles.map(a => (
               <div key={a.id} className="bg-white border rounded-lg p-4 shadow-sm">
-                <div className="font-semibold text-gray-800 mb-1">{a.title}</div>
+                <div className="font-semibold text-gray-800 mb-1">{sanitizeText(a.title || '')}</div>
                 <div className="text-sm text-gray-600 mb-3">{a.articleType}</div>
 
                 <div className="flex flex-col sm:flex-row gap-2 mb-3">
@@ -411,11 +419,11 @@ const PublishArticlesPage = () => {
 
                 {expandedArticleId === a.id && (
                   <div className="text-sm text-gray-700 border-t pt-3 mt-3 space-y-2">
-                    {a.keywords && <div><span className="font-medium">Keywords:</span> {a.keywords}</div>}
+                    {a.keywords && <div><span className="font-medium">Keywords:</span> {sanitizeText(a.keywords)}</div>}
                     {a.abstract && (
                       <div>
                         <div className="font-medium mb-1">Abstract</div>
-                        <div className="whitespace-pre-wrap text-gray-600">{a.abstract}</div>
+                        <div className="whitespace-pre-wrap text-gray-600">{sanitizeText(a.abstract)}</div>
                       </div>
                     )}
                     {a.pdfPath && (
@@ -451,7 +459,7 @@ const PublishArticlesPage = () => {
           <div className="space-y-4">
             {publishedArticles.map(a => (
               <div key={a.id} className="bg-white border rounded-lg p-4 shadow-sm">
-                <div className="font-semibold text-gray-800 mb-1">{a.title}</div>
+                <div className="font-semibold text-gray-800 mb-1">{sanitizeText(a.title || '')}</div>
                 <div className="text-sm text-gray-600 mb-2">{a.articleType}</div>
                 {a.issue && (
                   <div className="text-sm text-gray-500 mb-2">
@@ -470,12 +478,12 @@ const PublishArticlesPage = () => {
 
                 {expandedArticleId === a.id && (
                   <div className="text-sm text-gray-700 border-t pt-3 mt-3 space-y-2">
-                    {a.doi && <div><span className="font-medium">DOI:</span> {a.doi}</div>}
-                    {a.keywords && <div><span className="font-medium">Keywords:</span> {a.keywords}</div>}
+                    {a.doi && <div><span className="font-medium">DOI:</span> {sanitizeText(a.doi)}</div>}
+                    {a.keywords && <div><span className="font-medium">Keywords:</span> {sanitizeText(a.keywords)}</div>}
                     {a.abstract && (
                       <div>
                         <div className="font-medium mb-1">Abstract</div>
-                        <div className="whitespace-pre-wrap text-gray-600">{a.abstract}</div>
+                        <div className="whitespace-pre-wrap text-gray-600">{sanitizeText(a.abstract)}</div>
                       </div>
                     )}
                     {a.pdfPath && (

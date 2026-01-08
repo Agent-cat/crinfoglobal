@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { createVolume, createIssue, updateVolume, deleteVolume, updateIssue, deleteIssue } from '../../utils/api';
+import { revalidateContent } from '@/app/actions';
 import { useAuth } from '../../hooks/useAuth';
 import { useVolumes } from '../../hooks/useVolumes';
 import { useSubmittedArticles, usePublishedArticles, usePublishArticle } from '../../hooks/useArticles';
@@ -35,6 +36,7 @@ const AdminPage = () => {
     try {
       await createVolume(num);
       setNewVolumeNumber('');
+      await revalidateContent('volumes');
       refetchVolumes();
     } catch (error) {
       console.error('Failed to create volume:', error);
@@ -49,6 +51,7 @@ const AdminPage = () => {
     try {
       await createIssue(volumeId, parseInt(number, 10), month, parseInt(year, 10));
       setNewIssue({ volumeId: '', number: '', month: '', year: '' });
+      await revalidateContent('volumes');
       refetchVolumes();
     } catch (error) {
       console.error('Failed to create issue:', error);
@@ -59,6 +62,8 @@ const AdminPage = () => {
   const handlePublish = async (articleId, issueId) => {
     try {
       await publishArticleMutation.mutateAsync({ articleId, issueId });
+      await revalidateContent('articles');
+      await revalidateContent('volumes');
     } catch (error) {
       console.error('Failed to publish article:', error);
     }
@@ -68,6 +73,7 @@ const AdminPage = () => {
     try {
       await updateVolume(volumeId, parseInt(number, 10));
       setEditingVolume(null);
+      await revalidateContent('volumes');
       refetchVolumes();
     } catch (error) {
       console.error('Failed to update volume:', error);
@@ -79,6 +85,7 @@ const AdminPage = () => {
     try {
       await deleteVolume(volumeId);
       setDeleteConfirm(null);
+      await revalidateContent('volumes');
       refetchVolumes();
     } catch (error) {
       console.error('Failed to delete volume:', error);
@@ -90,6 +97,7 @@ const AdminPage = () => {
     try {
       await updateIssue(issueId, parseInt(number, 10), month, parseInt(year, 10));
       setEditingIssue(null);
+      await revalidateContent('volumes');
       refetchVolumes();
     } catch (error) {
       console.error('Failed to update issue:', error);
@@ -101,6 +109,7 @@ const AdminPage = () => {
     try {
       await deleteIssue(issueId);
       setDeleteConfirm(null);
+      await revalidateContent('volumes');
       refetchVolumes();
     } catch (error) {
       console.error('Failed to delete issue:', error);

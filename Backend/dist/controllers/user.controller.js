@@ -79,8 +79,7 @@ export const Signup = async (req, res) => {
         });
         // Queue OTP email (non-blocking)
         try {
-            const jobId = queueOTPEmail(email, otp);
-            console.log('OTP email queued:', jobId);
+            queueOTPEmail(email, otp);
         }
         catch (emailError) {
             console.error('Failed to queue OTP email:', emailError);
@@ -105,11 +104,10 @@ export const Logout = async (req, res) => {
             expires: new Date(0),
         });
         res.json({
-            message: "user loged out",
+            message: "user logged out",
         });
     }
     catch (error) {
-        console.log(`Error in logout controller ${error.message}`);
         res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -307,8 +305,7 @@ export const ResendOTP = async (req, res) => {
         });
         // Queue OTP email (non-blocking)
         try {
-            const jobId = queueOTPEmail(email, otp);
-            console.log('OTP email queued:', jobId);
+            queueOTPEmail(email, otp);
         }
         catch (emailError) {
             console.error('Failed to queue OTP email:', emailError);
@@ -334,7 +331,6 @@ export const CheckAuth = async (req, res) => {
         });
     }
     catch (error) {
-        console.log(`Error in checkAuth controller ${error.message}`);
         res.status(500).json({ message: "Internal server error" });
     }
 };

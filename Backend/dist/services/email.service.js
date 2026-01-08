@@ -23,8 +23,8 @@ const transporter = nodemailer.createTransport({
     pool: true, // Use connection pooling
     maxConnections: 5,
     maxMessages: 10,
-    debug: true, // Enable debug logging
-    logger: true // Enable logger
+    debug: false, // Disable debug logging
+    logger: false // Disable logger
 });
 // Fallback configuration for when Gmail fails
 const fallbackTransporter = nodemailer.createTransport({
@@ -44,51 +44,28 @@ const fallbackTransporter = nodemailer.createTransport({
     pool: true,
     maxConnections: 5,
     maxMessages: 10,
-    debug: true,
-    logger: true
+    debug: false,
+    logger: false
 });
 // Function to send email with fallback
 const sendEmailWithFallback = async (mailOptions) => {
     // Check if email sending is disabled
     if (DISABLE_EMAIL) {
-        console.log('=== EMAIL DISABLED ===');
-        console.log('DISABLE_EMAIL is set to true. Email would be sent to:', mailOptions.to);
-        console.log('Subject:', mailOptions.subject);
-        console.log('=== END EMAIL DISABLED ===');
         return true;
     }
     // Check if we're in development mode
     const isDevelopment = (process.env.NODE_ENV !== 'production') || FORCE_DEV_MODE;
-    // Log email configuration for debugging
-    console.log('=== EMAIL CONFIGURATION ===');
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-    console.log('EMAIL_USER:', process.env.EMAIL_USER);
-    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***SET***' : 'NOT SET');
-    console.log('EDITOR_EMAIL:', process.env.EDITOR_EMAIL || 'NOT SET (using EMAIL_USER as fallback)');
-    console.log('To:', mailOptions.to);
-    console.log('Subject:', mailOptions.subject);
-    console.log('Attachments:', mailOptions.attachments?.length || 0);
-    console.log('=== END CONFIGURATION ===');
-    // In development, use console logging instead of sending emails
     if (isDevelopment) {
-        console.log('=== DEVELOPMENT MODE: Email would be sent ===');
-        console.log('To:', mailOptions.to);
-        console.log('Subject:', mailOptions.subject);
-        console.log('Content:', mailOptions.html || mailOptions.text);
-        console.log('=== END DEVELOPMENT EMAIL ===');
         return true;
     }
     // Check if email credentials are configured
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.error('EMAIL_USER or EMAIL_PASS not configured. Skipping email send.');
-        console.log('To enable emails, set EMAIL_USER and EMAIL_PASS in .env file');
         return false;
     }
     // Verify transporter configuration before attempting to send
     try {
-        console.log('Verifying primary transporter connection...');
         await transporter.verify();
-        console.log('Primary transporter verified successfully');
     }
     catch (verifyError) {
         console.warn('Primary transporter verification failed:', verifyError.message);
@@ -96,10 +73,7 @@ const sendEmailWithFallback = async (mailOptions) => {
     }
     // Try primary transporter first
     try {
-        console.log('Attempting to send email with primary transporter (port 587, TLS)...');
         const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent successfully with primary transporter');
-        console.log('Message ID:', info.messageId);
         return true;
     }
     catch (primaryError) {
@@ -108,10 +82,7 @@ const sendEmailWithFallback = async (mailOptions) => {
         console.error('Error command:', primaryError.command);
         // Try fallback transporter
         try {
-            console.log('Attempting to send email with fallback transporter (port 465, SSL)...');
             const info = await fallbackTransporter.sendMail(mailOptions);
-            console.log('Email sent successfully with fallback transporter');
-            console.log('Message ID:', info.messageId);
             return true;
         }
         catch (fallbackError) {
@@ -161,9 +132,7 @@ export const sendOTPEmail = async (email, otp) => {
     let lastError;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            console.log(`Attempting to send OTP email (attempt ${attempt}/${maxRetries})`);
             await sendEmailWithFallback(mailOptions);
-            console.log('OTP email sent successfully');
             return true;
         }
         catch (error) {
@@ -171,16 +140,12 @@ export const sendOTPEmail = async (email, otp) => {
             console.error(`Email send attempt ${attempt} failed:`, error.message);
             if (attempt < maxRetries) {
                 const delay = attempt * 2000; // Exponential backoff: 2s, 4s, 6s
-                console.log(`Retrying in ${delay}ms...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
     }
     console.error('All email send attempts failed:', lastError);
     // Fallback: Log the OTP to console for development/testing
-    console.log('=== EMAIL FALLBACK - OTP FOR DEVELOPMENT ===');
-    console.log(`OTP for ${email}: ${otp}`);
-    console.log('=== END FALLBACK ===');
     return false;
 };
 export const generateOTP = () => {
@@ -201,7 +166,6 @@ export const sendEditorNotificationEmail = async (articleData, pdfPath, editorEm
                     path: actualPath,
                     contentType: 'application/pdf'
                 });
-                console.log('PDF attachment added:', filename);
             }
             else {
                 console.warn('PDF file not found at:', actualPath);
@@ -216,15 +180,12 @@ export const sendEditorNotificationEmail = async (articleData, pdfPath, editorEm
     let recipientEmails;
     if (editorEmails && editorEmails.length > 0) {
         recipientEmails = editorEmails;
-        console.log(`Sending to ${editorEmails.length} editor(s) from database:`, editorEmails);
     }
     else if (process.env.EDITOR_EMAIL) {
         recipientEmails = [process.env.EDITOR_EMAIL];
-        console.log('Sending to EDITOR_EMAIL from env:', process.env.EDITOR_EMAIL);
     }
     else {
         recipientEmails = [process.env.EMAIL_USER];
-        console.log('Sending to EMAIL_USER as fallback:', process.env.EMAIL_USER);
     }
     const mailOptions = {
         from: process.env.EMAIL_USER,
@@ -287,9 +248,7 @@ export const sendEditorNotificationEmail = async (articleData, pdfPath, editorEm
     let lastError;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            console.log(`Attempting to send editor notification email (attempt ${attempt}/${maxRetries})`);
             await sendEmailWithFallback(mailOptions);
-            console.log('Editor notification email sent successfully');
             return true;
         }
         catch (error) {
@@ -297,7 +256,6 @@ export const sendEditorNotificationEmail = async (articleData, pdfPath, editorEm
             console.error(`Editor notification email send attempt ${attempt} failed:`, error.message);
             if (attempt < maxRetries) {
                 const delay = attempt * 2000; // Exponential backoff: 2s, 4s, 6s
-                console.log(`Retrying in ${delay}ms...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
@@ -355,9 +313,7 @@ export const sendUserSubmissionConfirmationEmail = async (userEmail, articleData
     let lastError;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            console.log(`Attempting to send user confirmation email (attempt ${attempt}/${maxRetries})`);
             await sendEmailWithFallback(mailOptions);
-            console.log('User confirmation email sent successfully to:', userEmail);
             return true;
         }
         catch (error) {
@@ -365,7 +321,6 @@ export const sendUserSubmissionConfirmationEmail = async (userEmail, articleData
             console.error(`User confirmation email send attempt ${attempt} failed:`, error.message);
             if (attempt < maxRetries) {
                 const delay = attempt * 2000; // Exponential backoff: 2s, 4s, 6s
-                console.log(`Retrying in ${delay}ms...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
@@ -407,9 +362,7 @@ export const sendPasswordResetEmail = async (email, resetToken) => {
     let lastError;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            console.log(`Attempting to send password reset email (attempt ${attempt}/${maxRetries})`);
             await sendEmailWithFallback(mailOptions);
-            console.log('Password reset email sent successfully');
             return true;
         }
         catch (error) {

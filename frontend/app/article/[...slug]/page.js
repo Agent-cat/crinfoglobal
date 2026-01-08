@@ -1,5 +1,6 @@
 import React from 'react'
 import { getArticle } from '../../../utils/serverApi'
+import { sanitizeText, sanitizeDoi } from '../../../utils/sanitize'
 import Link from 'next/link'
 import ArticleContent from './ArticleContent'
 
@@ -17,15 +18,17 @@ export async function generateMetadata({ params }) {
     const publishDate = article.publishedAt ? new Date(article.publishedAt) : null;
     const formattedDate = publishDate ? `${publishDate.getFullYear()}/${String(publishDate.getMonth() + 1).padStart(2, '0')}/${String(publishDate.getDate()).padStart(2, '0')}` : '';
 
+    const safeTitle = sanitizeText(article.title || '');
+    const safeDoi = article.doi ? sanitizeDoi(article.doi) : '';
     const citationTags = {
       'citation_journal_title': 'Frontiers in Engineering and Informatics',
       'citation_issn': '3049-3412',
-      'citation_title': article.title,
+      'citation_title': safeTitle,
       'citation_publication_date': formattedDate,
       'citation_volume': article.issue?.volume?.number?.toString() || '',
       'citation_issue': article.issue?.number?.toString() || '',
-      'citation_doi': article.doi || '',
-      'citation_pdf_url': article.doi ? `https://fei.crinfoglobal.com/article_repo/${article.doi}.pdf` : '',
+      'citation_doi': safeDoi,
+      'citation_pdf_url': safeDoi ? `https://fei.crinfoglobal.com/article_repo/${safeDoi}.pdf` : '',
     };
 
     if (article.startPage) citationTags['citation_firstpage'] = article.startPage.toString();
@@ -38,8 +41,8 @@ export async function generateMetadata({ params }) {
     }
 
     return {
-      title: `${article.title} | Crinfo Global Publishers`,
-      description: article.abstract?.substring(0, 160),
+      title: `${safeTitle} | Crinfo Global Publishers`,
+      description: sanitizeText(article.abstract || '').substring(0, 160),
       other: otherTags
     };
   } catch (error) {
@@ -82,7 +85,7 @@ const ArticlePage = async ({ params, searchParams }) => {
         </div>
 
         <h1 className='text-2xl font-bold mt-2 leading-tight'>
-          {article.title}
+          {sanitizeText(article.title || '')}
           <span className='ml-2 inline-block align-middle text-[11px] px-2 py-[2px] rounded bg-amber-100 text-amber-800 whitespace-nowrap'>Open Access</span>
         </h1>
 

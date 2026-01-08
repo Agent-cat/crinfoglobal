@@ -3,17 +3,21 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePublishedArticles, useUpdateArticle, useDeleteArticle } from "../../../hooks/useArticles";
+import { useVolumes } from "../../../hooks/useVolumes";
 import { useAuth } from "../../../hooks/useAuth";
+import { sanitizeText, sanitizeKeywords, sanitizeDoi } from "../../../utils/sanitize";
+import { revalidateContent } from '@/app/actions';
 
 const PublishedArticlesPage = () => {
   const router = useRouter();
   const { data: user, isLoading: authLoading } = useAuth();
   const { data: publishedArticles = [], isLoading: articlesLoading } = usePublishedArticles();
+  const { data: volumes = [], isLoading: volumesLoading } = useVolumes();
   const [editingArticle, setEditingArticle] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
-  const loading = authLoading || articlesLoading;
+  const loading = authLoading || articlesLoading || volumesLoading;
 
   const updateArticleMutation = useUpdateArticle();
   const deleteArticleMutation = useDeleteArticle();
@@ -26,6 +30,9 @@ const PublishedArticlesPage = () => {
     if (!deleteConfirmation) return;
     try {
       await deleteArticleMutation.mutateAsync(deleteConfirmation);
+      await revalidateContent('articles');
+      await revalidateContent('latest-articles');
+      await revalidateContent('volumes');
       setDeleteConfirmation(null);
       alert("Article deleted successfully.");
     } catch (error) {
@@ -36,6 +43,18 @@ const PublishedArticlesPage = () => {
 
   const handleEditClick = (article) => {
     setEditingArticle(article);
+    let authorsList = [];
+    try {
+      if (typeof article.authorsJson === 'string') {
+        authorsList = JSON.parse(article.authorsJson);
+      } else if (Array.isArray(article.authorsJson)) {
+        authorsList = article.authorsJson;
+      }
+    } catch (e) { }
+
+    // Ensure it is an array and has at least one empty object if empty
+    if (!Array.isArray(authorsList)) authorsList = [];
+
     setEditForm({
       title: article.title || "",
       abstract: article.abstract || "",
@@ -43,13 +62,36 @@ const PublishedArticlesPage = () => {
       doi: article.doi || "",
       totalPages: article.totalPages || "",
       articleType: article.articleType || "Research Article",
+      issueId: article.issueId || "",
+      authors: authorsList,
     });
+  };
+
+  const handleAddAuthor = () => {
+    setEditForm(prev => ({
+      ...prev,
+      authors: [...(prev.authors || []), { name: '', email: '', affiliation: '' }]
+    }));
+  };
+
+  const handleRemoveAuthor = (index) => {
+    setEditForm(prev => ({
+      ...prev,
+      authors: (prev.authors || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleAuthorChange = (index, field, value) => {
+    const newAuthors = [...(editForm.authors || [])];
+    newAuthors[index] = { ...newAuthors[index], [field]: value };
+    setEditForm({ ...editForm, authors: newAuthors });
   };
 
   const handleEditSave = async () => {
     if (!editingArticle) return;
     try {
       let dataToSend;
+      const authorsJsonStr = JSON.stringify(editForm.authors || []);
 
       if (editForm.file) {
         // Use FormData if file is being updated
@@ -60,18 +102,32 @@ const PublishedArticlesPage = () => {
         formData.append('doi', editForm.doi);
         formData.append('totalPages', editForm.totalPages);
         formData.append('articleType', editForm.articleType);
+        formData.append('issueId', editForm.issueId);
+        formData.append('authors', authorsJsonStr);
         formData.append('pdf', editForm.file);
         dataToSend = formData;
       } else {
         // Use JSON if no file update
-        const { file, ...rest } = editForm;
-        dataToSend = rest;
+        const { file, authors, ...rest } = editForm;
+        dataToSend = { ...rest, authors: authorsJsonStr }; // Send as string or parsed JSON? Backend handles parsed string if needed, but previously we sent authors as string in formData. 
+        // Backend text said: "Sanitized authors" and "authorsJson = typeof authors === 'string' ? JSON.parse(authors) : authors"
+        // So sending JSON object (array) directly in body is fine for JSON request.
+        // Wait, for JSON content-type, we can send the array directly as 'authors'.
+        // Backend code: if (authors !== undefined) { try { updateData.authorsJson = typeof authors === 'string' ? JSON.parse(authors) : authors; ... } }
+        // So passing the array directly in 'authors' works.
+        dataToSend.authors = editForm.authors;
       }
 
       await updateArticleMutation.mutateAsync({
         articleId: editingArticle.id,
         data: dataToSend
       });
+
+      await revalidateContent('articles');
+      await revalidateContent('latest-articles');
+      await revalidateContent(`article-${editingArticle.id}`);
+      await revalidateContent('volumes');
+
       setEditingArticle(null);
       setEditForm({});
       alert("Article updated successfully!");
@@ -204,7 +260,7 @@ const PublishedArticlesPage = () => {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 text-lg mb-2 group-hover:text-[#083b7a] transition-colors line-clamp-2">
-                          {a.title}
+                          {sanitizeText(a.title || '')}
                         </h3>
                         <div className="flex flex-wrap gap-2 items-center">
                           <span className="inline-block px-2 py-1 text-xs font-medium bg-black text-white rounded">
@@ -223,7 +279,7 @@ const PublishedArticlesPage = () => {
                     {/* Abstract Preview */}
                     {a.abstract && (
                       <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                        {a.abstract}
+                        {sanitizeText(a.abstract)}
                       </p>
                     )}
 
@@ -244,7 +300,7 @@ const PublishedArticlesPage = () => {
                               d="M13 10V3L4 14h7v7l9-11h-7z"
                             />
                           </svg>
-                          <span className="line-clamp-1">{a.doi}</span>
+                          <span className="line-clamp-1">{sanitizeDoi(a.doi || '')}</span>
                         </div>
                       )}
                       {a.totalPages && (
@@ -410,6 +466,81 @@ const PublishedArticlesPage = () => {
                       </option>
                       <option value="Editorial">Editorial</option>
                     </select>
+                  </div>
+
+                  {/* Select Issue */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Select Issue
+                    </label>
+                    <select
+                      className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#083b7a]"
+                      value={editForm.issueId}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, issueId: e.target.value })
+                      }
+                    >
+                      <option value="">-- Select Issue --</option>
+                      {volumes.map((vol) => (
+                        <optgroup key={vol.id} label={`Volume ${vol.number}`}>
+                          {(vol.issues || []).map((issue) => (
+                            <option key={issue.id} value={issue.id}>
+                              Issue {issue.number} ({issue.month} {issue.year})
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Authors List */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Authors
+                    </label>
+                    <div className="space-y-3">
+                      {(editForm.authors || []).map((author, index) => (
+                        <div key={index} className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Name"
+                              className="flex-1 border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#083b7a]"
+                              value={author.name || ''}
+                              onChange={(e) => handleAuthorChange(index, 'name', e.target.value)}
+                            />
+                            <input
+                              type="email"
+                              placeholder="Email"
+                              className="flex-1 border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#083b7a]"
+                              value={author.email || ''}
+                              onChange={(e) => handleAuthorChange(index, 'email', e.target.value)}
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Affiliation"
+                              className="flex-1 border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#083b7a]"
+                              value={author.affiliation || ''}
+                              onChange={(e) => handleAuthorChange(index, 'affiliation', e.target.value)}
+                            />
+                            <button
+                              onClick={() => handleRemoveAuthor(index)}
+                              className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={handleAddAuthor}
+                      className="mt-2 text-sm text-[#083b7a] hover:underline font-medium"
+                    >
+                      + Add Author
+                    </button>
                   </div>
 
                   {/* Abstract */}

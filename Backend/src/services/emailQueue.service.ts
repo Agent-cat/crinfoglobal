@@ -47,8 +47,6 @@ class EmailQueue {
       this.queue.push(job);
     }
 
-    console.log(`[EmailQueue] Job added: ${jobId} (type: ${type}, queue size: ${this.queue.length})`);
-
     // Trigger immediate processing if not already processing
     if (!this.processing) {
       this.processQueue();
@@ -65,8 +63,6 @@ class EmailQueue {
       return;
     }
 
-    console.log('[EmailQueue] Starting background processing...');
-
     // Process queue every 2 seconds
     this.processingInterval = setInterval(() => {
       if (this.queue.length > 0 && !this.processing) {
@@ -82,7 +78,6 @@ class EmailQueue {
     if (this.processingInterval) {
       clearInterval(this.processingInterval);
       this.processingInterval = null;
-      console.log('[EmailQueue] Background processing stopped');
     }
   }
 
@@ -104,14 +99,10 @@ class EmailQueue {
       }
 
       try {
-        console.log(`[EmailQueue] Processing job: ${job.id} (attempt ${job.attempts + 1}/${job.maxAttempts})`);
-
         await this.processJob(job);
 
         // Job succeeded, remove from queue
         this.queue.shift();
-        console.log(`[EmailQueue] Job completed: ${job.id} (remaining: ${this.queue.length})`);
-
       } catch (error: any) {
         job.attempts++;
 
@@ -190,7 +181,6 @@ class EmailQueue {
   clear() {
     const count = this.queue.length;
     this.queue = [];
-    console.log(`[EmailQueue] Cleared ${count} jobs from queue`);
   }
 }
 

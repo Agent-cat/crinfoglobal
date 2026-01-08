@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { checkAuth, listPublishedArticles, BASE_URL } from '../../../../utils/api';
+import { sanitizeText, sanitizeKeywords, sanitizeDoi, sanitizeAuthor } from '../../../../utils/sanitize';
 
 const PublishedArticleDetailPage = () => {
   const params = useParams();
@@ -38,7 +39,9 @@ const PublishedArticleDetailPage = () => {
     if (!authorsJson) return 'N/A';
     try {
       const authors = typeof authorsJson === 'string' ? JSON.parse(authorsJson) : authorsJson;
-      return authors.map(a => a.name + (a.superscript ? `^${a.superscript}` : '')).join(', ');
+      if (!Array.isArray(authors)) return 'N/A';
+      const sanitized = authors.map(sanitizeAuthor).filter(a => a !== null);
+      return sanitized.map(a => sanitizeText(a.name) + (a.superscript ? `^${sanitizeText(a.superscript)}` : '')).join(', ');
     } catch {
       return 'N/A';
     }
@@ -134,17 +137,20 @@ const PublishedArticleDetailPage = () => {
               )}
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              {article.title}
+              {sanitizeText(article.title || '')}
             </h1>
             <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-              {article.doi && (
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <span className="font-medium">DOI: {article.doi}</span>
-                </div>
-              )}
+              {article.doi && (() => {
+                const safeDoi = sanitizeDoi(article.doi);
+                return safeDoi ? (
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span className="font-medium">DOI: {safeDoi}</span>
+                  </div>
+                ) : null;
+              })()}
               {article.totalPages && (
                 <div className="flex items-center gap-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +195,7 @@ const PublishedArticleDetailPage = () => {
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Abstract</h2>
                 <div className="bg-gray-50 rounded-lg p-4 text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {article.abstract}
+                  {sanitizeText(article.abstract)}
                 </div>
               </div>
             )}
@@ -199,12 +205,12 @@ const PublishedArticleDetailPage = () => {
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Keywords</h2>
                 <div className="flex flex-wrap gap-2">
-                  {article.keywords.split(',').map((keyword, idx) => (
+                  {sanitizeKeywords(article.keywords).map((keyword, idx) => (
                     <span
                       key={idx}
                       className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
                     >
-                      {keyword.trim()}
+                      {keyword}
                     </span>
                   ))}
                 </div>
@@ -219,21 +225,21 @@ const PublishedArticleDetailPage = () => {
                 {article.conflictOfInterest && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-700 mb-1">Conflict of Interest</h3>
-                    <p className="text-gray-600 text-sm">{article.conflictOfInterest}</p>
+                    <p className="text-gray-600 text-sm">{sanitizeText(article.conflictOfInterest)}</p>
                   </div>
                 )}
 
                 {article.fundingInfo && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-700 mb-1">Funding Information</h3>
-                    <p className="text-gray-600 text-sm">{article.fundingInfo}</p>
+                    <p className="text-gray-600 text-sm">{sanitizeText(article.fundingInfo)}</p>
                   </div>
                 )}
 
                 {article.dataAvailability && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-700 mb-1">Data Availability</h3>
-                    <p className="text-gray-600 text-sm">{article.dataAvailability}</p>
+                    <p className="text-gray-600 text-sm">{sanitizeText(article.dataAvailability)}</p>
                   </div>
                 )}
               </div>
@@ -261,16 +267,19 @@ const PublishedArticleDetailPage = () => {
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900 mb-3">How to Cite</h2>
               <div className="text-sm text-gray-700 space-y-2">
-                <p><strong>Title:</strong> {article.title}</p>
+                <p><strong>Title:</strong> {sanitizeText(article.title || '')}</p>
                 <p><strong>Authors:</strong> {formatAuthors(article.authorsJson)}</p>
                 {article.issue && (
                   <>
                     <p><strong>Volume:</strong> {article.issue.volume?.number}</p>
                     <p><strong>Issue:</strong> {article.issue.number}</p>
-                    <p><strong>Published:</strong> {article.issue.month} {article.issue.year}</p>
+                    <p><strong>Published:</strong> {sanitizeText(article.issue.month || '')} {article.issue.year}</p>
                   </>
                 )}
-                {article.doi && <p><strong>DOI:</strong> {article.doi}</p>}
+                {article.doi && (() => {
+                  const safeDoi = sanitizeDoi(article.doi);
+                  return safeDoi ? <p><strong>DOI:</strong> {safeDoi}</p> : null;
+                })()}
               </div>
             </div>
           </div>

@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { checkAuth, listSubmittedArticles, listVolumes, publishArticle, BASE_URL } from '../../../../utils/api';
+import { revalidateContent } from '@/app/actions';
+import { sanitizeText, sanitizeKeywords, sanitizeAuthor } from '../../../../utils/sanitize';
 
 const SubmittedArticleDetailPage = () => {
   const params = useParams();
@@ -51,6 +53,8 @@ const SubmittedArticleDetailPage = () => {
     setPublishing(true);
     try {
       await publishArticle(articleId, selectedIssueId);
+      await revalidateContent('articles');
+      await revalidateContent('volumes');
       alert('Article published successfully!');
       router.push('/admin/submitted');
     } catch (error) {
@@ -65,7 +69,9 @@ const SubmittedArticleDetailPage = () => {
     if (!authorsJson) return 'N/A';
     try {
       const authors = typeof authorsJson === 'string' ? JSON.parse(authorsJson) : authorsJson;
-      return authors.map(a => a.name + (a.superscript ? `^${a.superscript}` : '')).join(', ');
+      if (!Array.isArray(authors)) return 'N/A';
+      const sanitized = authors.map(sanitizeAuthor).filter(a => a !== null);
+      return sanitized.map(a => sanitizeText(a.name) + (a.superscript ? `^${sanitizeText(a.superscript)}` : '')).join(', ');
     } catch {
       return 'N/A';
     }
@@ -152,7 +158,7 @@ const SubmittedArticleDetailPage = () => {
               </span>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              {article.title}
+              {sanitizeText(article.title || '')}
             </h1>
             <div className="flex flex-wrap gap-4 text-sm text-gray-600">
               {article.totalPages && (
@@ -179,7 +185,7 @@ const SubmittedArticleDetailPage = () => {
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Abstract</h2>
                 <div className="bg-gray-50 rounded-lg p-4 text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {article.abstract}
+                  {sanitizeText(article.abstract)}
                 </div>
               </div>
             )}
@@ -189,12 +195,12 @@ const SubmittedArticleDetailPage = () => {
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">Keywords</h2>
                 <div className="flex flex-wrap gap-2">
-                  {article.keywords.split(',').map((keyword, idx) => (
+                  {sanitizeKeywords(article.keywords).map((keyword, idx) => (
                     <span
                       key={idx}
                       className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
                     >
-                      {keyword.trim()}
+                      {keyword}
                     </span>
                   ))}
                 </div>
@@ -209,21 +215,21 @@ const SubmittedArticleDetailPage = () => {
                 {article.conflictOfInterest && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-700 mb-1">Conflict of Interest</h3>
-                    <p className="text-gray-600 text-sm">{article.conflictOfInterest}</p>
+                    <p className="text-gray-600 text-sm">{sanitizeText(article.conflictOfInterest)}</p>
                   </div>
                 )}
 
                 {article.fundingInfo && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-700 mb-1">Funding Information</h3>
-                    <p className="text-gray-600 text-sm">{article.fundingInfo}</p>
+                    <p className="text-gray-600 text-sm">{sanitizeText(article.fundingInfo)}</p>
                   </div>
                 )}
 
                 {article.dataAvailability && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-700 mb-1">Data Availability</h3>
-                    <p className="text-gray-600 text-sm">{article.dataAvailability}</p>
+                    <p className="text-gray-600 text-sm">{sanitizeText(article.dataAvailability)}</p>
                   </div>
                 )}
               </div>

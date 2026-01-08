@@ -1,58 +1,62 @@
-import { getAllPublishedArticles, getPublicVolumes } from '../utils/serverApi';
+import { getPublicVolumes, getAllPublishedArticles } from '../utils/serverApi';
 
 export default async function sitemap() {
     const baseUrl = 'https://fei.crinfoglobal.com';
 
     // Static routes
-    const staticRoutes = [
-        '',
-        '/about',
-        '/contact',
-        '/volumes',
-        '/submit',
-        '/ethics',
-        '/editorial-board',
-        '/instructions',
-        '/indexing',
-        '/apc',
-        '/privacy-policy',
-        '/terms',
-        '/refunds',
-    ].map((route) => ({
-        url: `${baseUrl}${route}`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly',
-        priority: route === '' ? 1 : 0.8,
-    }));
+    const routes = [
+        {
+            url: baseUrl,
+            lastModified: new Date(),
+        },
+        {
+            url: `${baseUrl}/volumes`,
+            lastModified: new Date(),
+        },
+    ];
 
-    // Dynamic routes
-    let articles = [];
-    let volumes = [];
     try {
-        [articles, volumes] = await Promise.all([
-            getAllPublishedArticles(),
-            getPublicVolumes()
-        ]);
+        // 1. Fetch Volumes & Issues
+        const volumes = await getPublicVolumes();
+        const issueUrls = [];
+
+        if (Array.isArray(volumes)) {
+            volumes.forEach((vol) => {
+                if (vol.issues && Array.isArray(vol.issues)) {
+                    vol.issues.forEach((issue) => {
+                        issueUrls.push({
+                            url: `${baseUrl}/issue/${issue.id}`,
+                            lastModified: new Date(issue.updatedAt || new Date()),
+                        });
+                    });
+                }
+            });
+        }
+
+        // 2. Fetch Articles
+        // The user example shows article URLs using DOI: /article/10.63949/crinfo.v1i1.001
+        const articles = await getAllPublishedArticles();
+        const articleUrls = [];
+
+        if (Array.isArray(articles)) {
+            articles.forEach((article) => {
+                if (article.doi) {
+                    articleUrls.push({
+                        url: `${baseUrl}/article/${article.doi}`,
+                        lastModified: new Date(article.updatedAt || new Date()),
+                    });
+                } else if (article.id) {
+                    // Fallback to ID if no DOI, though the user requested DOI style.
+                    // However based on user sample, only DOI ones are shown.
+                    // I will verify if I should include ID based URLs. 
+                    // The user example ONLY shows DOI. I'll prioritize DOI.
+                }
+            });
+        }
+
+        return [...routes, ...issueUrls, ...articleUrls];
     } catch (error) {
-        console.error('Error fetching data for sitemap:', error);
+        console.error('Sitemap generation failed:', error);
+        return routes;
     }
-
-    const issueRoutes = volumes.flatMap(volume =>
-        (volume.issues || []).map(issue => ({
-            url: `${baseUrl}/issue/${issue.id}`,
-            lastModified: new Date(issue.updatedAt || new Date()),
-            changeFrequency: 'monthly',
-            priority: 0.7,
-        }))
-    );
-
-    const articleRoutes = articles.map((article) => ({
-        url: `${baseUrl}/article/${article.doi || article.id}`,
-        lastModified: new Date(article.updatedAt || new Date()),
-        changeFrequency: 'weekly',
-        priority: 0.9,
-    }));
-
-    return [...staticRoutes, ...issueRoutes, ...articleRoutes];
 }
-

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../hooks/useAuth';
 import { useSubmittedArticles, usePublishArticle } from '../../../hooks/useArticles';
 import { useVolumes } from '../../../hooks/useVolumes';
+import { sanitizeText } from '../../../utils/sanitize';
+import { revalidateContent } from '@/app/actions';
 
 const SubmittedArticlesPage = () => {
   const router = useRouter();
@@ -21,6 +23,8 @@ const SubmittedArticlesPage = () => {
 
     try {
       await publishArticleMutation.mutateAsync({ articleId, issueId });
+      await revalidateContent('articles');
+      await revalidateContent('volumes');
       alert('Article published successfully!');
     } catch (error) {
       console.error('Failed to publish article:', error);
@@ -134,7 +138,7 @@ const SubmittedArticlesPage = () => {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 text-lg mb-2 group-hover:text-[#083b7a] transition-colors line-clamp-2">
-                          {a.title}
+                          {sanitizeText(a.title || '')}
                         </h3>
                         <span className="inline-block px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded">
                           {a.articleType}
@@ -145,7 +149,7 @@ const SubmittedArticlesPage = () => {
                     {/* Abstract Preview */}
                     {a.abstract && (
                       <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                        {a.abstract}
+                        {sanitizeText(a.abstract)}
                       </p>
                     )}
 

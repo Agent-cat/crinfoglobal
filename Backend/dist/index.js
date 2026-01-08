@@ -16,6 +16,20 @@ app.use(cors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
 }));
+// Security headers middleware
+app.use((req, res, next) => {
+    // Content Security Policy - prevent XSS attacks
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' " + (process.env.FRONTEND_URL || 'http://localhost:3000') + "; frame-ancestors 'none';");
+    // XSS Protection
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    // Prevent MIME type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    // Prevent clickjacking
+    res.setHeader('X-Frame-Options', 'DENY');
+    // Referrer Policy
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/content", contentRoutes);
 // Ensure uploads directory exists

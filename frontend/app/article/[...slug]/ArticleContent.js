@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect } from 'react'
 import { requestDownload, downloadArticlePdf } from '../../../utils/api'
-
+import { sanitizeText, sanitizeEmail, sanitizeDoi, sanitizeKeywords, sanitizeAuthor } from '../../../utils/sanitize'
 import Link from 'next/link'
 import { useAuth } from '../../../hooks/useAuth'
 
@@ -14,9 +14,14 @@ export default function ArticleContent({ article, initialTab }) {
     const [loadingCitation, setLoadingCitation] = useState(false)
     const [showCitation, setShowCitation] = useState(false)
 
-    const authors = typeof article.authorsJson === 'string'
+    const authorsRaw = typeof article.authorsJson === 'string'
         ? JSON.parse(article.authorsJson)
         : article.authorsJson;
+    
+    // Sanitize all authors
+    const authors = Array.isArray(authorsRaw) 
+        ? authorsRaw.map(sanitizeAuthor).filter(a => a !== null)
+        : [];
 
     const handleDownload = async () => {
         try {
@@ -24,7 +29,8 @@ export default function ArticleContent({ article, initialTab }) {
             const blobUrl = window.URL.createObjectURL(res.data);
             const a = document.createElement('a');
             a.href = blobUrl;
-            a.download = `${article.title.substring(0, 30)}.pdf`;
+            const safeTitle = sanitizeText(article.title || 'article').substring(0, 30).replace(/[<>:"/\\|?*]/g, '');
+            a.download = `${safeTitle}.pdf`;
             a.click();
             window.URL.revokeObjectURL(blobUrl);
         } catch (err) {
@@ -56,7 +62,7 @@ export default function ArticleContent({ article, initialTab }) {
             const data = [{
                 id: article.id,
                 type: 'article-journal',
-                title: article.title,
+                title: sanitizeText(article.title || ''),
                 author: cslAuthors,
                 issued: {
                     'date-parts': [[date.getFullYear(), date.getMonth() + 1, date.getDate()]]
@@ -65,7 +71,7 @@ export default function ArticleContent({ article, initialTab }) {
                 volume: article.volume?.number,
                 issue: article.issue?.number,
                 page: article.startPage && article.endPage ? `${article.startPage}-${article.endPage}` : undefined,
-                DOI: article.doi,
+                DOI: article.doi ? sanitizeDoi(article.doi) : undefined,
                 ISSN: '3049-3412',
                 publisher: 'Crinfo Global Publishers'
             }];
@@ -106,37 +112,40 @@ export default function ArticleContent({ article, initialTab }) {
                 {authors && Array.isArray(authors) && authors.length > 0 && (
                     <div className='mb-8 border-b pb-6'>
                         <div className='flex flex-col gap-4'>
-                            {authors.map((author, i) => (
-                                <div key={i} className='flex flex-col'>
-                                    <span className='font-bold text-lg text-[#083b7a]'>{author.name}</span>
-                                    {author.affiliation && (
-                                        <span className='text-gray-600 text-sm italic'>{author.affiliation}</span>
-                                    )}
-                                    {author.email && (
-                                        <div className='flex items-center gap-1 mt-1'>
-                                            <svg className='w-3 h-3 text-gray-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' />
-                                            </svg>
-                                            <a href={`mailto:${author.email}`} className='text-blue-600 text-sm hover:underline'>
-                                                {author.email}
-                                            </a>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                            {authors.map((author, i) => {
+                                const safeEmail = sanitizeEmail(author.email);
+                                return (
+                                    <div key={i} className='flex flex-col'>
+                                        <span className='font-bold text-lg text-[#083b7a]'>{author.name}</span>
+                                        {author.affiliation && (
+                                            <span className='text-gray-600 text-sm italic'>{author.affiliation}</span>
+                                        )}
+                                        {safeEmail && (
+                                            <div className='flex items-center gap-1 mt-1'>
+                                                <svg className='w-3 h-3 text-gray-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' />
+                                                </svg>
+                                                <a href={`mailto:${safeEmail}`} className='text-blue-600 text-sm hover:underline'>
+                                                    {safeEmail}
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 )}
                 <h2 className='text-lg font-semibold mb-4'>Abstract</h2>
-                <p className='text-gray-800 leading-relaxed whitespace-pre-wrap text-lg'>{article.abstract}</p>
+                <p className='text-gray-800 leading-relaxed whitespace-pre-wrap text-lg'>{sanitizeText(article.abstract || '')}</p>
 
                 {article.keywords && (
                     <div className='mt-8 pt-6 border-t'>
                         <div className='text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide'>Keywords</div>
                         <div className='flex flex-wrap gap-2'>
-                            {article.keywords.split(',').map((kw, i) => (
+                            {sanitizeKeywords(article.keywords).map((kw, i) => (
                                 <span key={i} className='px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full border border-blue-100'>
-                                    {kw.trim()}
+                                    {kw}
                                 </span>
                             ))}
                         </div>
@@ -145,12 +154,15 @@ export default function ArticleContent({ article, initialTab }) {
 
                 <div className='mt-8 pt-6 border-t flex flex-col gap-6 md:flex-row md:items-center md:justify-between bg-gray-50 p-6 rounded-xl border border-gray-100'>
                     <div className='flex-1'>
-                        {article.doi && (
-                            <Link href={`https://www.doi.org/${article.doi}`} className='inline-flex flex-col bg-orange-50 border border-orange-200 rounded-lg px-4 py-2 hover:bg-orange-100 transition-colors'>
-                                <span className='text-xs font-bold text-orange-800 uppercase tracking-wider mb-0.5'>DOI</span>
-                                <span className='text-sm font-mono text-orange-900 break-all select-all font-medium'>www.doi.org/{article.doi}</span>
-                            </Link>
-                        )}
+                        {article.doi && (() => {
+                            const safeDoi = sanitizeDoi(article.doi);
+                            return safeDoi ? (
+                                <Link href={`https://www.doi.org/${safeDoi}`} className='inline-flex flex-col bg-orange-50 border border-orange-200 rounded-lg px-4 py-2 hover:bg-orange-100 transition-colors'>
+                                    <span className='text-xs font-bold text-orange-800 uppercase tracking-wider mb-0.5'>DOI</span>
+                                    <span className='text-sm font-mono text-orange-900 break-all select-all font-medium'>www.doi.org/{safeDoi}</span>
+                                </Link>
+                            ) : null;
+                        })()}
                     </div>
                     <div className='flex flex-wrap gap-3'>
                         <button
@@ -163,18 +175,21 @@ export default function ArticleContent({ article, initialTab }) {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
                             Cite
                         </button>
-                        {article.pdfPath && (
-                            <a
-                                href={article.doi ? `/article_repo/${article.doi}.pdf` : '#'}
-                                target={article.doi ? "_blank" : undefined}
-                                rel={article.doi ? "noopener noreferrer" : undefined}
-                                className='px-5 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors font-medium flex items-center gap-2 shadow-sm'
-                                onClick={!article.doi ? handleDownload : undefined}
-                            >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" /></svg>
-                                {article.doi ? 'View PDF' : 'Download PDF'}
-                            </a>
-                        )}
+                        {article.pdfPath && (() => {
+                            const safeDoi = article.doi ? sanitizeDoi(article.doi) : null;
+                            return (
+                                <a
+                                    href={safeDoi ? `/article_repo/${safeDoi}.pdf` : '#'}
+                                    target={safeDoi ? "_blank" : undefined}
+                                    rel={safeDoi ? "noopener noreferrer" : undefined}
+                                    className='px-5 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors font-medium flex items-center gap-2 shadow-sm'
+                                    onClick={!safeDoi ? handleDownload : undefined}
+                                >
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" /></svg>
+                                    {safeDoi ? 'View PDF' : 'Download PDF'}
+                                </a>
+                            );
+                        })()}
                     </div>
                 </div>
 

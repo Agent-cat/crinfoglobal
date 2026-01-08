@@ -7,6 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import { queueEditorNotification, queueUserConfirmation } from '../services/emailQueue.service.js';
 import { PDFParse } from 'pdf-parse';
+import { sanitizeArticleInput, sanitizeText, sanitizeEmail } from '../utils/sanitize.js';
 const uploadDir = path.join(process.cwd(), 'uploads', 'articles');
 const storage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadDir),
@@ -20,6 +21,9 @@ const upload = multer({
     }
 });
 const router = express.Router();
+const getDoiFilename = (doi) => {
+    return `${doi.replace(/\//g, '_')}.pdf`;
+};
 // Volumes
 router.post('/volumes', Protected, RequireEditor, async (req, res) => {
     const { number } = req.body;
@@ -134,7 +138,9 @@ router.post('/articles', Protected, upload.fields([
     { name: 'attachments', maxCount: 1 },
     { name: 'script', maxCount: 1 }
 ]), async (req, res) => {
-    const { title, articleType, keywords, abstract, conflictOfInterest, fundingInfo, dataAvailability, authors } = req.body;
+    // Sanitize all input data
+    const sanitized = sanitizeArticleInput(req.body);
+    const { title, articleType, keywords, abstract, conflictOfInterest, fundingInfo, dataAvailability, authors } = sanitized;
     try {
         if (!title || !articleType || !abstract) {
             return res.status(400).json({ message: 'Missing required fields' });
@@ -186,7 +192,7 @@ router.post('/articles', Protected, upload.fields([
                 conflictOfInterest,
                 fundingInfo,
                 dataAvailability,
-                authorsJson: typeof authors === 'string' ? JSON.parse(authors) : authors,
+                authorsJson: sanitized.authors || (typeof authors === 'string' ? JSON.parse(authors) : authors),
                 pdfPath: pdfPublicPath,
                 totalPages: totalPages ?? null,
                 status: 'SUBMITTED',
@@ -205,15 +211,11 @@ router.post('/articles', Protected, upload.fields([
                 },
             });
             const editorEmails = editors.map(editor => editor.email);
-            if (editorEmails.length > 0) {
-                console.log(`Found ${editorEmails.length} verified editor(s) in database`);
-            }
-            else {
+            if (editorEmails.length === 0) {
                 console.warn('No verified editors found in database, using fallback email');
             }
             // Queue editor notification (non-blocking)
-            const jobId = queueEditorNotification(article, pdfPublicPath || undefined, editorEmails);
-            console.log('Editor notification email queued:', jobId);
+            queueEditorNotification(article, pdfPublicPath || undefined, editorEmails);
         }
         catch (emailError) {
             console.error('Failed to queue editor notification email:', emailError);
@@ -223,8 +225,7 @@ router.post('/articles', Protected, upload.fields([
         try {
             const userEmail = req.user.email;
             if (userEmail) {
-                const jobId = queueUserConfirmation(userEmail, article);
-                console.log('User confirmation email queued:', jobId);
+                queueUserConfirmation(userEmail, article);
             }
         }
         catch (emailError) {
@@ -258,7 +259,7 @@ router.put('/articles/:articleId', Protected, RequireEditor, upload.fields([
     { name: 'pdf', maxCount: 1 }
 ]), async (req, res) => {
     const { articleId } = req.params;
-    const { title, abstract, keywords, doi, totalPages, articleType } = req.body;
+    const { title, abstract, keywords, doi, totalPages, articleType, issueId, authors } = req.body;
     try {
         const updateData = {};
         if (title !== undefined)
@@ -273,15 +274,53 @@ router.put('/articles/:articleId', Protected, RequireEditor, upload.fields([
             updateData.totalPages = parseInt(totalPages);
         if (articleType !== undefined)
             updateData.articleType = articleType;
+        if (issueId !== undefined)
+            updateData.issueId = issueId;
+        if (authors !== undefined) {
+            try {
+                updateData.authorsJson = typeof authors === 'string' ? JSON.parse(authors) : authors;
+                // Sanitize authors
+                if (Array.isArray(updateData.authorsJson)) {
+                    updateData.authorsJson = updateData.authorsJson.map((author) => ({
+                        name: sanitizeText(author.name || ''),
+                        email: sanitizeEmail(author.email || ''),
+                        affiliation: sanitizeText(author.affiliation || ''),
+                        superscript: sanitizeText(author.superscript || ''),
+                    })).filter((a) => a.name && a.email);
+                }
+            }
+            catch (e) {
+                console.error('Error parsing authors JSON during update:', e);
+                // Don't update authors if parsing fails
+            }
+        }
         // Handle PDF upload if present
         const files = req.files;
+        const currentArticle = await prisma.article.findUnique({ where: { id: articleId } });
+        const effectiveDoi = doi !== undefined ? doi : currentArticle?.doi;
         if (files?.pdf?.[0]?.path) {
-            const pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(files.pdf[0].path)}`;
+            let finalFilename = path.basename(files.pdf[0].path);
+            if (effectiveDoi) {
+                finalFilename = getDoiFilename(effectiveDoi);
+                const newPath = path.join(uploadDir, finalFilename);
+                // Delete existing file if it exists and is different
+                try {
+                    if (fs.existsSync(newPath)) {
+                        await fs.promises.unlink(newPath);
+                    }
+                }
+                catch (e) {
+                    console.error('Error deleting existing file:', e);
+                }
+                await fs.promises.rename(files.pdf[0].path, newPath);
+            }
+            const pdfPublicPath = `/api/content/public/articles/pdf/${finalFilename}`;
             updateData.pdfPath = pdfPublicPath;
             // Try to update page count from new PDF
             let parser = null;
             try {
-                const buffer = await fs.promises.readFile(files.pdf[0].path);
+                const filePath = effectiveDoi ? path.join(uploadDir, finalFilename) : files.pdf[0].path;
+                const buffer = await fs.promises.readFile(filePath);
                 parser = new PDFParse({ data: buffer });
                 const info = await parser.getInfo();
                 updateData.totalPages = info.total;
@@ -298,6 +337,22 @@ router.put('/articles/:articleId', Protected, RequireEditor, upload.fields([
                         console.error('Error destroying PDF parser:', e);
                     }
                 }
+            }
+        }
+        else if (doi && currentArticle?.doi !== doi && currentArticle?.pdfPath) {
+            // DOI changed, but no new PDF. Rename existing one if possible.
+            const oldFilename = currentArticle.pdfPath.split('/').pop();
+            const oldPath = path.join(uploadDir, oldFilename);
+            const newFilename = getDoiFilename(doi);
+            const newPath = path.join(uploadDir, newFilename);
+            try {
+                if (fs.existsSync(oldPath)) {
+                    await fs.promises.rename(oldPath, newPath);
+                    updateData.pdfPath = `/api/content/public/articles/pdf/${newFilename}`;
+                }
+            }
+            catch (e) {
+                console.error('Error renaming PDF on DOI change:', e);
             }
         }
         const updated = await prisma.article.update({
@@ -328,27 +383,34 @@ router.post('/articles/create-publish', Protected, RequireEditor, upload.fields(
     { name: 'file', maxCount: 1 },
     { name: 'script', maxCount: 1 }
 ]), async (req, res) => {
-    const { title, abstract, keywords, pages, doi, issueId, authors } = req.body;
+    // Sanitize all input data
+    const sanitized = sanitizeArticleInput(req.body);
+    const { title, abstract, keywords, pages, doi, issueId, authors } = { ...sanitized, pages: req.body.pages, issueId: req.body.issueId };
     try {
         if (!title || !abstract || !issueId) {
             return res.status(400).json({ message: 'Missing required fields: title, abstract, issueId' });
         }
-        // Parse authors if it's a string
-        let authorsData;
-        try {
-            authorsData = typeof authors === 'string' ? JSON.parse(authors) : authors;
-        }
-        catch (e) {
-            return res.status(400).json({ message: 'Invalid authors format' });
+        // Use sanitized authors from sanitizeArticleInput
+        let authorsData = sanitized.authors;
+        if (!authorsData) {
+            try {
+                authorsData = typeof authors === 'string' ? JSON.parse(authors) : authors;
+                // Sanitize if not already sanitized
+                if (Array.isArray(authorsData)) {
+                    authorsData = authorsData.map((author) => ({
+                        name: sanitizeText(author.name || ''),
+                        email: sanitizeEmail(author.email || ''),
+                        affiliation: sanitizeText(author.affiliation || ''),
+                        superscript: sanitizeText(author.superscript || ''),
+                    })).filter((a) => a.name && a.email);
+                }
+            }
+            catch (e) {
+                return res.status(400).json({ message: 'Invalid authors format' });
+            }
         }
         if (!authorsData || !Array.isArray(authorsData) || authorsData.length === 0) {
             return res.status(400).json({ message: 'At least one author is required' });
-        }
-        // Validate authors have required fields
-        for (const author of authorsData) {
-            if (!author.name || !author.email) {
-                return res.status(400).json({ message: 'All authors must have name and email' });
-            }
         }
         // Handle multiple file uploads
         const files = req.files;
@@ -356,10 +418,26 @@ router.post('/articles/create-publish', Protected, RequireEditor, upload.fields(
         let pdfPublicPath = null;
         let totalPages = null;
         if (files?.file?.[0]?.path) {
-            pdfPublicPath = `/api/content/public/articles/pdf/${path.basename(files.file[0].path)}`;
+            let finalFilename = path.basename(files.file[0].path);
+            if (doi) {
+                finalFilename = getDoiFilename(doi);
+                const newPath = path.join(uploadDir, finalFilename);
+                // Delete existing file if it exists and is different
+                try {
+                    if (fs.existsSync(newPath)) {
+                        await fs.promises.unlink(newPath);
+                    }
+                }
+                catch (e) {
+                    console.error('Error deleting existing file:', e);
+                }
+                await fs.promises.rename(files.file[0].path, newPath);
+            }
+            pdfPublicPath = `/api/content/public/articles/pdf/${finalFilename}`;
             let parser = null;
             try {
-                const buffer = await fs.promises.readFile(files.file[0].path);
+                const filePath = doi ? path.join(uploadDir, finalFilename) : files.file[0].path;
+                const buffer = await fs.promises.readFile(filePath);
                 parser = new PDFParse({ data: buffer });
                 const info = await parser.getInfo();
                 totalPages = info.total;
@@ -449,9 +527,7 @@ router.get('/public/issue/:issueId', async (req, res) => {
 });
 // Public: latest articles for sidebar
 router.get('/public/articles/latest', async (_req, res) => {
-    console.log('GET /public/articles/latest hit');
     try {
-        console.log('Querying findMany...');
         const articles = await prisma.article.findMany({
             where: { status: 'PUBLISHED' },
             take: 5,
@@ -461,6 +537,25 @@ router.get('/public/articles/latest', async (_req, res) => {
                     include: { volume: true }
                 }
             }
+        });
+        res.json({ data: articles });
+    }
+    catch (e) {
+        res.status(400).json({ message: e.message });
+    }
+});
+// Public: all published articles for sitemap
+router.get('/public/articles/all', async (_req, res) => {
+    try {
+        const articles = await prisma.article.findMany({
+            where: { status: 'PUBLISHED' },
+            select: {
+                id: true,
+                doi: true,
+                updatedAt: true,
+                issueId: true
+            },
+            orderBy: { publishedAt: 'desc' }
         });
         res.json({ data: articles });
     }
@@ -502,12 +597,35 @@ router.get('/public/article/:articleId', async (req, res) => {
         res.status(400).json({ message: e.message });
     }
 });
+// Public: Serve PDF by DOI
+router.get(/^\/article_repo\/(.*)\.pdf$/, async (req, res) => {
+    const doi = req.params[0];
+    try {
+        const article = await prisma.article.findFirst({
+            where: { doi: doi },
+        });
+        if (!article || !article.pdfPath) {
+            return res.status(404).json({ message: 'Article or PDF not found' });
+        }
+        // pdfPath stores api url ending with filename, e.g., /api/content/public/articles/pdf/filename.pdf
+        const file = article.pdfPath.split('/').pop();
+        const filePath = path.join(uploadDir, file);
+        await fs.promises.access(filePath);
+        res.setHeader('Content-Type', 'application/pdf');
+        // Display in browser instead of forcing download
+        res.setHeader('Content-Disposition', `inline; filename="${doi.replace(/\//g, '_')}.pdf"`);
+        res.sendFile(filePath);
+    }
+    catch (err) {
+        return res.status(404).end();
+    }
+});
 // Public: serve stored PDFs
 // Now gated through approval; use /download/:articleId instead
 router.get('/public/articles/pdf/:file', async (_req, res) => {
     return res.status(403).json({ message: 'Direct download disabled' });
 });
-// Request PDF access
+// Request access (Global)
 router.post('/articles/:articleId/request-download', Protected, async (req, res) => {
     const { articleId } = req.params;
     const userId = req.user.id;
@@ -518,6 +636,7 @@ router.post('/articles/:articleId/request-download', Protected, async (req, res)
             return res.status(200).json({ message: 'You already have full access', data: { status: 'APPROVED' } });
         }
         // Check for ANY pending request - enforce global single request policy
+        // We check if the user has ANY pending request, regardless of the article
         const pendingRequest = await prisma.downloadRequest.findFirst({
             where: {
                 userId: req.user.id,
@@ -528,6 +647,7 @@ router.post('/articles/:articleId/request-download', Protected, async (req, res)
             return res.status(200).json({ message: 'Request already pending', data: pendingRequest });
         }
         // Create new request
+        // We still link it to an article for context, but the approval will be global
         const created = await prisma.downloadRequest.create({ data: { articleId, userId } });
         res.status(201).json({ message: 'Request created', data: created });
     }
@@ -583,16 +703,14 @@ router.get('/download-requests', Protected, RequireEditor, async (_req, res) => 
 // Approved download endpoint
 router.get('/articles/:articleId/download', Protected, async (req, res) => {
     const { articleId } = req.params;
-    const userId = req.user.id;
     const user = req.user;
     const article = await prisma.article.findUnique({ where: { id: articleId } });
     if (!article || !article.pdfPath)
         return res.status(404).json({ message: 'Not found' });
-    // Check for global full access OR specific approval
+    // STRICT GLOBAL ACCESS CHECK
+    // Removed article-specific approval logic. Only users with hasFullAccess can download.
     if (!user.hasFullAccess) {
-        const approved = await prisma.downloadRequest.findFirst({ where: { articleId, userId, status: 'APPROVED' } });
-        if (!approved)
-            return res.status(403).json({ message: 'Not approved' });
+        return res.status(403).json({ message: 'Global access required' });
     }
     // pdfPath stores api url ending with filename
     const file = article.pdfPath.split('/').pop();
@@ -627,6 +745,8 @@ router.get('/articles/published', Protected, RequireEditor, async (_req, res) =>
             createdAt: true,
             status: true,
             pdfPath: true,
+            authorsJson: true,
+            issueId: true,
             issue: {
                 include: { volume: true }
             }
